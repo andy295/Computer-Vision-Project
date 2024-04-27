@@ -15,10 +15,10 @@ class CSVModel:
 
     # It initializes the data object.
     def initialize(self, data, header=None):
-        
+
         if header is not None:
             self.initializeDescription(header)
-            
+
         outerKey, dataDict = data  # Unpack the tuple into key and value
         parts = outerKey.split(KEY_SEPARATOR)
         for i, part in enumerate(parts):
@@ -41,7 +41,7 @@ class CSVModel:
 
     # It initializes the description of the experiment.
     def initializeDescription(self, data):
-        
+
         self._description = dict(data[HEADER_SHORT])
 
     # It provides a convenient way to quickly view the relevant information
@@ -52,7 +52,7 @@ class CSVModel:
 
         for key, value in self._description.items():
             print(f"\t{key.replace(SPACE_REPLACEMENT, ' ')}: {value}")
-        
+
         print(f"\n\tTime number of elements: {len(self._time)}")
 
         print(f"\n\tRotations number of elements: {len(self._rotations)}")
@@ -64,7 +64,39 @@ class CSVModel:
             print(f"\t{key.replace(SPACE_REPLACEMENT, ' ')}: {len(value)}")
 
 # todo add description
-class BHVModel:
+class BVHModel:
+
+    def __init__(self, data):
+
+        self._animation = None
+        self._names = None
+        self._frameTime = None
+
+        self.initialize(data)
+
+    # It initializes the data object.
+    def initialize(self, data):
+
+        for key, value in data.items():
+
+            if key == ANIMATION:
+                self._animation = value
+            elif key == NAMES:
+                self._names = value
+            elif key == TIME:
+                self._frameTime = value
+
+    # It provides a convenient way to quickly view the relevant information
+    # about the configuration of the model.
+    def info(self):
+
+            print(f"Model info:")
+
+            print(f"\n\tNames number of elements: {len(self._names)}")
+            print(f"\n\tFrame time: {self._frameTime}")
+
+# todo add description
+class C3DModel:
 
     def __init__(self, data, header=None):
 
@@ -92,8 +124,9 @@ def createModels(filePath=None, data=None):
                 model = CSVModel(item, header=data[HEADER])
                 models.append(model)
 
-    elif fExt == EXTENSIONS[Extension.bhv]:
-        data = extractDataBHV(data)
+    elif fExt == EXTENSIONS[Extension.bvh]:
+        model = BVHModel(data)
+        models.append(model)
 
     elif fExt == EXTENSIONS[Extension.c3d]:
         data = extractDataC3D(data)
@@ -102,4 +135,4 @@ def createModels(filePath=None, data=None):
         print(f'Error: Invalid file extension: {fExt}\n')
         return None
 
-    return models
+    return models if len(models) > 0 else None

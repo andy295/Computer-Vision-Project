@@ -217,7 +217,8 @@ class Experiment():
       print(f'Error: Something wrong preparing the data\n')
       return data
 
-    self.initializeDescription(data)
+    # to check
+    # self.initializeDescription(data)
     self._models = createModels(self._inFile, data)
 
     print(f'Data correctly prepared\n')

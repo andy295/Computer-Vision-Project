@@ -15,8 +15,11 @@ def formatData(filePath=None, data=None):
     if fExt == EXTENSIONS[Extension.csv]:
         data = extractDataCSV(data)
         
-    elif fExt == EXTENSIONS[Extension.bhv]:
-        data = extractDataBHV(data)
+    elif fExt == EXTENSIONS[Extension.bvh]:
+        # to read the data from a BVH file, we are using and external library
+        # which reads and provides the data in a structured way
+        # we can directly return the data
+        return data
 
     elif fExt == EXTENSIONS[Extension.c3d]:
         data = extractDataC3D(data)
@@ -119,10 +122,6 @@ def extractDataCSV(data):
         dataDict = None
 
     return dataDict
-
-# todo add description
-def extractDataBHV(data):
-    return None
 
 # todo add description
 def extractDataC3D(data):

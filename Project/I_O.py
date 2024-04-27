@@ -99,72 +99,95 @@ def checkFile(mode=None, filePath=None):
 # or None if unsuccessful.
 def readData(filePath=None):
 
+  res = checkFile(mode=LOAD, filePath=filePath)
+  if isinstance(res, bool) and not res:
+    return None
+
   _, fExt = os.path.splitext(filePath)
 
   data = None
   if fExt == EXTENSIONS[Extension.csv]:
-    print(f'csv file start')
+    print(f'CSV file reading')
     data = readCSV(filePath)
-    print(f'csv file end')
     
-  elif fExt == EXTENSIONS[Extension.bhv]:
-    print(f'bhv file start')
-    data = readBHV(filePath)
-    print(f'bhv file end')
+  elif fExt == EXTENSIONS[Extension.bvh]:
+    print(f'BVH file reading')
+    data = readBVH(filePath)
 
   elif fExt == EXTENSIONS[Extension.c3d]:
-    print(f'c3d file start')
+    print(f'C3D file reading')
     data = readC3D(filePath)
-    print(f'c3d file end')
 
   else:
     print(f'Error: Invalid file extension: {fExt}\n')
 
   return data
 
-# Function to load a CSV file at the specified path and returns
+# Function to read the CSV file at the specified location and returns
 # the data as a list of lines.
 # If the file exists, can be read, and contains any lines,
 # the data list is returned.
 # If the CSV file is empty or cannot be read, None is returned.
 def readCSV(filePath):
 
-  res = checkFile(mode=LOAD, filePath=filePath)
-  if isinstance(res, bool) and not res:
-    return None
-
   data = []
-  with open(filePath, READ) as f:
-    for line in csv.reader(f):
-      data.append(line)
+  try:
 
-    # if VERBOSE >= DEBUG:
-    #   for line in data:
-    #     print(f'{line}')
+    with open(filePath, READ) as f:
+      for line in csv.reader(f):
+       data.append(line)
 
-  if len(data) > 0:
-    return data
-  else:
+  except Exception as e:
+    print(f'Error: Impossible to read CSV file - {e}\n')
     return None
 
-def readBHV(filePath):
-  res = checkFile(mode=LOAD, filePath=filePath)
-  if isinstance(res, bool) and not res:
+  # if VERBOSE >= DEBUG:
+  #   for line in data:
+  #     print(f'{line}')
+
+  return data if len(data) > 0 else None
+
+# Function to reads data from a BVH (Biovision Hierarchy) file located
+# at the given file path.
+# It is a function wrapper around the read_bvh() function provided by
+# an external library.
+# The returned data are organized into a dictionary.
+# This last is returned if the reading process is successful.
+# If an error occurs during the reading process, None is returned.
+def readBVH(filePath):
+
+  data = {}
+  try:
+
+    animation, names, frameTime = read_bvh(file_name=filePath)
+
+    data[ANIMATION] = animation
+    data[NAMES] = names
+    data[TIME] = frameTime
+
+  except Exception as e:
+    print(f'Error: Impossible to read BVH file - {e}\n')
     return None
+  
+  for key, value in data.items():
+      print("Key:", key)
+      print("Type of Value:", type(value))
 
-    # if VERBOSE >= DEBUG:
-    #   for line in data:
-    #     print(f'{line}')
-
-  return None
+  return data
 
 def readC3D(filePath):
-  res = checkFile(mode=LOAD, filePath=filePath)
-  if isinstance(res, bool) and not res:
-    return None
+  
+  data = []
+  try:
+    
+    data = None
 
+  except Exception as e:
+    print(f'Error: Impossible to read C3D file - {e}\n')
+    data = None
+  
     # if VERBOSE >= DEBUG:
     #   for line in data:
     #     print(f'{line}')
 
-  return None
+  return data

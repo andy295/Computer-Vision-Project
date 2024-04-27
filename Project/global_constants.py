@@ -1,7 +1,17 @@
 import os
+import sys
+
 import csv
 
 from enum import IntEnum
+
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+BHV_DIR = "bvh_reader"
+folderPath = os.path.join(ROOT_DIR, BHV_DIR)
+
+sys.path.append(folderPath)
+
+from BVH_FILE import *
 
 # FILE EXTENSIONS
 class Extension(IntEnum):
@@ -15,7 +25,7 @@ class Extension(IntEnum):
     json = 7
     pkl = 8
     zip = 9
-    bhv = 10
+    bvh = 10
     c3d = 11
 
 EXTENSIONS = (
@@ -29,24 +39,27 @@ EXTENSIONS = (
     '.json',
     '.pkl',
     '.zip',
-    '.bhv',
+    '.bvh',
     '.c3d'
     )
 
 # allowed extenSions for input files
 INPUT_EXTENSIONS = (
     '.csv',
-    '.bhv',
+    '.bvh',
     '.c3d'
     )
 
 # FILES NAMES
-SRC_FILE = 'ProvaRigidBody'
-# SRC_FILE = 'test'
+# SRC_FILE = 'test' + EXTENSIONS[Extension.csv]
+# SRC_FILE = 'ProvaRigidBody' + EXTENSIONS[Extension.csv]
+SRC_FILE = 'animation' + EXTENSIONS[Extension.bvh]
 
 # PATHS
 SRC_PATH = 'Data/60fps'
-INPUT_FILE = os.path.join(SRC_PATH, SRC_FILE + EXTENSIONS[Extension.csv])
+
+SRC_PATH = os.path.join(ROOT_DIR, SRC_PATH) 
+INPUT_FILE = os.path.join(SRC_PATH, SRC_FILE)
 
 # CSV STRUCTURE
 # the application is thought to work with CVS data version 1.23
@@ -59,6 +72,10 @@ CSV_VERSION_COLUMN = 1 # file header column number for version info
 CSV_HEADER_DATA_ROW = 2 # data header row start number
 CSV_HEADER_DATA_LEN = 5 # data header dimension
 CSV_DATA_COLUMN = 2 # data column start number
+
+# BVH STRUCTURE
+ANIMATION = 'animation'
+NAMES = 'names'
 
 # DATA STRUCTURE
 HEADER = 'Header'
