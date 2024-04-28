@@ -22,11 +22,11 @@ class Experiment():
     self._savePath = savePath
 
     self._verbose = verbose
-    
+
     self._description = {}
-    
+
     self._models = []
-    
+
     self.initialize()
 
   @property
@@ -131,7 +131,7 @@ class Experiment():
   def initializeDescription(self, data):
 
     self._description = dict(data[HEADER][HEADER_SHORT])
-    
+
   # It verifies various aspects of the input data:
   #   - input file
   #   - output path
@@ -184,11 +184,11 @@ class Experiment():
 
     self._saveData = False
     self._savePath = ''
-    
+
     self._verbose = INFO
-    
+
     self._description = {}
-    
+
     self._models = []
 
   # It is responsible for importing data from a specified input file.
@@ -198,7 +198,7 @@ class Experiment():
     print(f'Importing data data from {fName} file\n')
 
     data = readData(self._inFile)
-    
+
     if data is not None:
       print(f'Data correctly imported\n')
     else:
@@ -210,20 +210,10 @@ class Experiment():
   # It involves some preprocessing of the data.
   def prepareData(self, data):
     print(f'Preparing data\n')
-    
-    data = formatData(self._inFile, data)
 
-    if data is None:
-      print(f'Error: Something wrong preparing the data\n')
-      return data
-
-    # to check
-    # self.initializeDescription(data)
     self._models = createModels(self._inFile, data)
 
-    print(f'Data correctly prepared\n')
-
-    return data
+    print(f'Model(s) correctly prepared\n')
 
   # It ensures the sequential execution of the experiment steps and provides
   # a convenient way to run the entire experiment with a single method call.
@@ -233,20 +223,14 @@ class Experiment():
 
       if data is not None:
         data = self.prepareData(data)
-    
-        if data is not None:
+
+        if len(self._models) > 0:
           return True
-  
+
     if data is None:
       self.abort()
-    
+
     return False
-  
-    # if self.train():
-    #   return True
-      # if self.test():
-      #   if self.computeModelsWeights():
-      #     self.vote()
 
   # It provides a convenient way to quickly view the relevant information about
   # the experiment configuration and current state.
@@ -259,12 +243,10 @@ class Experiment():
     print(f"\tSave experiment: {'True' if self._saveData else 'False'}")
     print(f"\tSave directory path: {self._savePath}")
     print(f"\tVerbose level: {self._verbose}\n")
-    
+
     for key, value in self._description.items():
       print(f"\t{key.replace(SPACE_REPLACEMENT, ' ')}: {value}")
 
     for model in self._models:
       print()
       model.info()
-
-

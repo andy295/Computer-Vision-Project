@@ -1,4 +1,8 @@
+import csv
+import c3d # if library not found: pip install c3d
+
 from global_constants import *
+from data_manipulation import *
 from utils import *
 
 # Function to handle directory-related checks and validation based on
@@ -109,7 +113,7 @@ def readData(filePath=None):
   if fExt == EXTENSIONS[Extension.csv]:
     print(f'CSV file reading')
     data = readCSV(filePath)
-    
+
   elif fExt == EXTENSIONS[Extension.bvh]:
     print(f'BVH file reading')
     data = readBVH(filePath)
@@ -136,6 +140,9 @@ def readCSV(filePath):
     with open(filePath, READ) as f:
       for line in csv.reader(f):
        data.append(line)
+
+      if data is not None:
+        data = extractDataCSV(data)
 
   except Exception as e:
     print(f'Error: Impossible to read CSV file - {e}\n')
@@ -168,26 +175,30 @@ def readBVH(filePath):
   except Exception as e:
     print(f'Error: Impossible to read BVH file - {e}\n')
     return None
-  
-  for key, value in data.items():
-      print("Key:", key)
-      print("Type of Value:", type(value))
+
+  # for key, value in data.items():
+  #     print("Key:", key)
+  #     print("Type of Value:", type(value))
 
   return data
 
+# Function to read data from a C3D (Coordinate 3D) file
+# located at the given filePath.
+# It returns the data dictionary if at least one frame
+# was successfully read, otherwise it returns None.
+#  If an error occurs during the process returns None.
 def readC3D(filePath):
-  
-  data = []
+
+  data = None
   try:
-    
-    data = None
+
+    with open(filePath, READ_B) as f:
+        dataReader = c3d.Reader(f)
+
+        data = extractDataC3D(dataReader)
 
   except Exception as e:
-    print(f'Error: Impossible to read C3D file - {e}\n')
-    data = None
-  
-    # if VERBOSE >= DEBUG:
-    #   for line in data:
-    #     print(f'{line}')
+    print(f'Error: {e}')
+    return None
 
   return data

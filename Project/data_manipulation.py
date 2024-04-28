@@ -1,36 +1,7 @@
 from global_constants import *
 from utils import *
 
-# Function for exporting and formatting data based on the given file path and data.
-# It validates the input, determines the appropriate data extraction function
-# based on the file extension, extracts the data, and returns it if successful,
-# or None if there is an error.
-def formatData(filePath=None, data=None):
-
-    if data is None or filePath is None:
-        print(f'Error: Invalid data or file path\n')
-        return None
-
-    _, fExt = os.path.splitext(filePath)
-    if fExt == EXTENSIONS[Extension.csv]:
-        data = extractDataCSV(data)
-        
-    elif fExt == EXTENSIONS[Extension.bvh]:
-        # to read the data from a BVH file, we are using and external library
-        # which reads and provides the data in a structured way
-        # we can directly return the data
-        return data
-
-    elif fExt == EXTENSIONS[Extension.c3d]:
-        data = extractDataC3D(data)
-
-    else:
-        print(f'Error: Invalid file extension: {fExt}\n')
-        return None
-
-    return data
-
-# Function extracting and processing data from a pre-acquired CSV file.
+# Function to extract and process data from a pre-acquired CSV file.
 # It handles header extraction, version checking, time extraction, data processing,
 # and error handling.
 # Finally, it returns a dictionary containing the extracted data or None in case of errors.
@@ -52,7 +23,7 @@ def extractDataCSV(data):
                         raise CustomException(f'Error: CSV file version {value} is not supported\n')
 
                     dataDict[HEADER][HEADER_SHORT][key] = value
-                    
+
         # remove the header of the file
         # we don't need it anymore
         for i in range(CSV_HEADER_DATA_ROW):
@@ -102,7 +73,6 @@ def extractDataCSV(data):
             else:
                 dataDict[outerKey] = {middleKey: {innerKey: values}}
 
-
         # finally add to each middle dictionary the time
         for outerKey, middleDict in dataDict.items():
             if outerKey != HEADER:
@@ -123,6 +93,38 @@ def extractDataCSV(data):
 
     return dataDict
 
-# todo add description
-def extractDataC3D(data):
-    return None
+# Function to extract data from a C3D file using a provided dataReader
+# capable of reading C3D files.
+# It extracts point rate, scale factor, and frames data.
+# If the extraction process is successful, it returns a dictionary containing the data.
+# Otherwise, it returns None.
+def extractDataC3D(dataReader):
+
+    data = {C3D_POINT_RATE: 0, C3D_SCALE_FACTOR : 0, FRAME : {}}
+    try:
+
+        data[C3D_POINT_RATE] = dataReader.point_rate
+        point_scale = abs(dataReader.point_scale)
+        data[C3D_SCALE_FACTOR] = point_scale
+        for i, points, analog in dataReader.read_frames():
+
+            frameData = {}
+            for (x, y, z, err_est, cam_nr), label in zip(points, 
+                                        dataReader.point_labels):
+
+                label = label.strip()
+                frameData[label] = {
+                    X : x * point_scale,
+                    Y : y * point_scale,
+                    Z : z * point_scale,
+                    C3D_ERR_EST: err_est,
+                    C3D_CAMERA_NR: cam_nr
+                }
+
+            data[FRAME][i] = frameData
+
+    except Exception as e:
+        print(f'Error: Impossible to extract data from C3D file - {e}')
+        return None
+
+    return data

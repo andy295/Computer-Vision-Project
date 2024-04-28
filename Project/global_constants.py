@@ -1,8 +1,6 @@
 import os
 import sys
 
-import csv
-
 from enum import IntEnum
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -51,9 +49,9 @@ INPUT_EXTENSIONS = (
     )
 
 # FILES NAMES
-# SRC_FILE = 'test' + EXTENSIONS[Extension.csv]
-# SRC_FILE = 'ProvaRigidBody' + EXTENSIONS[Extension.csv]
-SRC_FILE = 'animation' + EXTENSIONS[Extension.bvh]
+SRC_FILE = 'ProvaRigidBody' + EXTENSIONS[Extension.csv]
+# SRC_FILE = 'animation' + EXTENSIONS[Extension.bvh]
+# SRC_FILE = 'marker' + EXTENSIONS[Extension.c3d]
 
 # PATHS
 SRC_PATH = 'Data/60fps'
@@ -77,15 +75,29 @@ CSV_DATA_COLUMN = 2 # data column start number
 ANIMATION = 'animation'
 NAMES = 'names'
 
+# C3D STRUCTURE
+C3D_ANALOG = 'analog'
+C3D_SCALE_FACTOR = 'scale_factor'
+C3D_ERR_EST = 'err_est' # estimated error
+C3D_CAMERA_NR = 'camera' # number of cameras that registered the point
+C3D_POINT_RATE = 'point_rate'
+
 # DATA STRUCTURE
-HEADER = 'Header'
+HEADER = 'header'
 HEADER_SHORT = 'H'
 
-TIME = 'Time'
+TIME = 'time'
 TIME_SHORT = 'T'
 
-ROTATION = 'Rotation'
-POSITION = 'Position'
+ROTATION = 'rotation'
+POSITION = 'position'
+
+POINT = 'point'
+FRAME = 'frame'
+
+X = 'x'
+Y = 'y'
+Z = 'z'
 
 TYPE = 0
 NAME = 1

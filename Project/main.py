@@ -1,7 +1,6 @@
 from experiment import *
 
-# This method puts all the modules together to train the models for image classification
-
+# This function puts all the modules together to import and process the data
 def main(save=True, operation=NEW, phase=ALL, inFile=INPUT_FILE, outPath=''):
 
   # new experiment
@@ -11,7 +10,7 @@ def main(save=True, operation=NEW, phase=ALL, inFile=INPUT_FILE, outPath=''):
                             outPath=outPath,
                             verbose=DEBUG
                             )
-    
+
   else:
     print(f'Error: Invalid operation: {operation}')
     print(f'Allowed operations are:')

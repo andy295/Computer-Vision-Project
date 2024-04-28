@@ -1,6 +1,44 @@
-from data_manipulation import *
+from global_constants import *
 
-# todo add description
+# Function to create instances of different model types based on the 
+# file extension and data provided.
+# It acts as a factory method encapsulationg the logic for creating models of different types
+# and allowing for easy extension to support additional file formats or model types in the future.
+def createModels(filePath=None, data=None):
+
+    if data is None or filePath is None:
+        print(f'Error: Invalid data or file path\n')
+        return None
+
+    models = []
+
+    _, fExt = os.path.splitext(filePath)
+    if fExt == EXTENSIONS[Extension.csv]:
+
+        for item in data.items():
+            key, value = item  # Unpack the tuple into key and value
+            if key != HEADER:
+                model = CSVModel(item, header=data[HEADER])
+                models.append(model)
+
+    elif fExt == EXTENSIONS[Extension.bvh]:
+        model = BVHModel(data)
+        models.append(model)
+
+    elif fExt == EXTENSIONS[Extension.c3d]:
+        model = C3DModel(data)
+        models.append(model)
+
+    else:
+        print(f'Error: Invalid file extension: {fExt}\n')
+        return []
+
+    return models if len(models) > 0 else []
+
+# Class designed to represent and provide information about a model 
+# derived from CSV data by encapsulating functionality for computing 
+# different operations on the data, such as initializing the model
+# or getting informative details about it.
 class CSVModel:
 
     def __init__(self, data, header=None):
@@ -63,7 +101,10 @@ class CSVModel:
         for key, value in self._positions.items():
             print(f"\t{key.replace(SPACE_REPLACEMENT, ' ')}: {len(value)}")
 
-# todo add description
+# Class designed to represent and provide information about a model 
+# derived from BVH data by encapsulating functionality for computing 
+# different operations on the data, such as initializing the model
+# or getting informative details about it.
 class BVHModel:
 
     def __init__(self, data):
@@ -95,44 +136,33 @@ class BVHModel:
             print(f"\n\tNames number of elements: {len(self._names)}")
             print(f"\n\tFrame time: {self._frameTime}")
 
-# todo add description
+# Class designed to represent and provide information about a model 
+# derived from C3D data by encapsulating functionality for computing 
+# different operations on the data, such as initializing the model
+# or getting informative details about it.
 class C3DModel:
 
-    def __init__(self, data, header=None):
+    def __init__(self, data):
 
-        self._description = {}
+        self._pointRate = 0
+        self._scaleFactor = 0
+        self._frames = {}
 
-        self._time = [] # seconds
-        self._rotations = {}
-        self._positions = {}
+        self.initialize(data)
 
-# todo add description
-def createModels(filePath=None, data=None):
+    # It initializes the data object.
+    def initialize(self, data):
 
-    if data is None or filePath is None:
-        print(f'Error: Invalid data or file path\n')
-        return None
+        self._pointRate =data[C3D_POINT_RATE]
+        self._scaleFactor = data[C3D_SCALE_FACTOR]
+        self._frames = data[FRAME]
 
-    models = []
+    # It provides a convenient way to quickly view the relevant information
+    # about the configuration of the model.
+    def info(self):
 
-    _, fExt = os.path.splitext(filePath)
-    if fExt == EXTENSIONS[Extension.csv]:
+        print(f"Model info:")
 
-        for item in data.items():
-            key, value = item  # Unpack the tuple into key and value
-            if key != HEADER:
-                model = CSVModel(item, header=data[HEADER])
-                models.append(model)
-
-    elif fExt == EXTENSIONS[Extension.bvh]:
-        model = BVHModel(data)
-        models.append(model)
-
-    elif fExt == EXTENSIONS[Extension.c3d]:
-        data = extractDataC3D(data)
-
-    else:
-        print(f'Error: Invalid file extension: {fExt}\n')
-        return None
-
-    return models if len(models) > 0 else None
+        print(f"\n\tPoint rate: {self._pointRate}")
+        print(f"\n\tScale factor: {self._scaleFactor}")
+        print(f"\n\tFrames number of elements: {len(self._frames)}")

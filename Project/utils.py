@@ -1,6 +1,6 @@
 from global_constants import *
 
-# This class is used only to rise and handle user-defined exceptions
+# Class used only to rise and handle user-defined exceptions
 class CustomException(Exception):
     pass
 
@@ -22,11 +22,11 @@ def emptyString(string):
 def extractFirstLetters(string):
     # Split the string into words
     words = string.split()
-  
+
     # Extract the first letter of each word
     first_letters = [word[0] for word in words]
-  
+
     # Join the first letters into a single string
     result = ''.join(first_letters)
-  
+
     return result
