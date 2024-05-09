@@ -1,5 +1,6 @@
 from I_O import *
 from models import *
+from plotter import *
 
 # The Experiment class represents an experiment with datasets and models.
 # It provides functionality to initialize and manage an experiment.
@@ -223,6 +224,10 @@ class Experiment():
 
       if data is not None:
         data = self.prepareData(data)
+        
+        markerRigidBodyPlot(self._models)
+        #skeletonMarkerPlot(data)
+        #skeletonJointsPlot(data)
 
         if len(self._models) > 0:
           return True

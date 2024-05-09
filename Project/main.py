@@ -23,7 +23,8 @@ def main(save=True, operation=NEW, phase=ALL, inFile=INPUT_FILE, outPath=''):
 
   if phase == ALL:
     if experiment.run():
-      experiment.info()
+      #experiment.info()
+      pass
   else:
     print(f'Error: Selected an invalid experiment phase: {phase}')
     print(f'Allowed phases are:')
