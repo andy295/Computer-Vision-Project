@@ -49,9 +49,15 @@ INPUT_EXTENSIONS = (
     )
 
 # FILES NAMES
-SRC_FILE = 'ProvaRigidBody' + EXTENSIONS[Extension.csv]
-# SRC_FILE = 'animation' + EXTENSIONS[Extension.bvh]
-# SRC_FILE = 'marker' + EXTENSIONS[Extension.c3d]
+RIGID_BODY = 'rigidbody'
+SKELETON = 'skeleton'
+ANIMATION = 'animation'
+MARKER = 'marker'
+
+SRC_FILE = RIGID_BODY + EXTENSIONS[Extension.csv]
+# SRC_FILE = SKELETON + EXTENSIONS[Extension.csv]
+# SRC_FILE = ANIMATION + EXTENSIONS[Extension.bvh]
+# SRC_FILE = MARKER + EXTENSIONS[Extension.c3d]
 
 # PATHS
 SRC_PATH = 'Data/60fps'
@@ -70,6 +76,8 @@ CSV_VERSION_COLUMN = 1 # file header column number for version info
 CSV_HEADER_DATA_ROW = 2 # data header row start number
 CSV_HEADER_DATA_LEN = 5 # data header dimension
 CSV_DATA_COLUMN = 2 # data column start number
+
+IGNORE_DATA = ['Marker'] # columns to be ignored
 
 # BVH STRUCTURE
 ANIMATION = 'animation'

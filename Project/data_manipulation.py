@@ -47,6 +47,12 @@ def extractDataCSV(data):
         # of the header; -1 because we want to use the last element of the header
         # as the key for the sub-dictionary
         for row in data:
+
+            # CSV file can contain some data that we want to ignore
+            # we can specify the type of data to ignore in the IGNORE_DATA list
+            if row[TYPE] in IGNORE_DATA:
+                continue
+
             outerKey = ''
             middleKey = ''
             innerKey = ''
@@ -85,7 +91,7 @@ def extractDataCSV(data):
         #         print('\t' + middleKey + ':')
         #         innerDict = middleDict[middleKey]
         #         for innerKey in sorted(innerDict.keys()):
-        #             print('\t\t' + innerKey + ':', innerDict[innerKey])
+        #             print('\t\t' + innerKey + ':')#, innerDict[innerKey])
 
     except Exception as e:
         print(f'Error: Impossible to extract data from CSV file - {e}\n')
