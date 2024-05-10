@@ -210,11 +210,18 @@ class Experiment():
   # It is responsible for formatting data and creating models.
   # It involves some preprocessing of the data.
   def prepareData(self, data):
+
     print(f'Preparing data\n')
 
     self._models = createModels(self._inFile, data)
 
     print(f'Model(s) correctly prepared\n')
+
+  def plotData(self):
+
+    print(f'Plotting data\n')
+
+    plotModels(self._inFile, self._models)
 
   # It ensures the sequential execution of the experiment steps and provides
   # a convenient way to run the entire experiment with a single method call.
@@ -224,13 +231,13 @@ class Experiment():
 
       if data is not None:
         data = self.prepareData(data)
-        
-        markerRigidBodyPlot(self._models)
-        #skeletonMarkerPlot(data)
-        #skeletonJointsPlot(data)
 
         if len(self._models) > 0:
+          self.plotData()
+
           return True
+
+      return True
 
     if data is None:
       self.abort()
