@@ -1,5 +1,3 @@
-from global_constants import *
-
 # Class used only to rise and handle user-defined exceptions
 class CustomException(Exception):
     pass
