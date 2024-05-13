@@ -14,7 +14,6 @@ def plotModels(filePath=None, data=None):
     if fExt == EXTENSIONS[Extension.csv]:
 
       if fName == RIGID_BODY:
-        return True         
         markerRigidBodyPlot(data)
 
       elif fName == SKELETON:

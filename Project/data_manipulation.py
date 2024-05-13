@@ -65,10 +65,11 @@ def extractDataCSV(data):
 
                 elif i < CSV_HEADER_DATA_LEN-1:
                     tmpStr = row[i].replace(' ', SPACE_REPLACEMENT)
-                    middleKey += tmpStr
+                    middleKey += tmpStr.lower()
 
                 else:
                     innerKey = row[CSV_HEADER_DATA_LEN-1] if row[CSV_HEADER_DATA_LEN-1] != '' else extractFirstLetters(row[CSV_HEADER_DATA_LEN-2])
+                    innerKey = innerKey.lower()
                     values = [float(x) if x != '' else float(0) for x in row[CSV_HEADER_DATA_LEN:]]
 
             if outerKey in dataDict:

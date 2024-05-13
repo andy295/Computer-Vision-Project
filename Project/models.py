@@ -41,7 +41,7 @@ def createModels(filePath=None, data=None):
 # or getting informative details about it.
 class CSVModel:
 
-    def __init__(self, data, header=None):
+    def __init__(self, data=None, header=None):
 
         self._description = {}
 
@@ -49,7 +49,8 @@ class CSVModel:
         self._rotations = {}
         self._positions = {}
 
-        self.initialize(data, header)
+        if data is not None:
+            self.initialize(data, header)
 
     # It initializes the data object.
     def initialize(self, data, header=None):
@@ -71,11 +72,11 @@ class CSVModel:
         for middleKey, value in dataDict.items():
 
             if middleKey == TIME:
-                self._time = value[TIME_SHORT]
+                self._time = copy.deepcopy(value[TIME_SHORT])
             elif middleKey == ROTATION:
-                self._rotations = value
+                self._rotations = copy.deepcopy(value)
             elif middleKey == POSITION:
-                self._positions = value
+                self._positions = copy.deepcopy(value)
 
     # It initializes the description of the experiment.
     def initializeDescription(self, data):

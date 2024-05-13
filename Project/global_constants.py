@@ -1,5 +1,6 @@
 import os
 import sys
+import copy
 
 from enum import IntEnum
 
@@ -92,10 +93,10 @@ C3D_POINT_RATE = 'point_rate'
 
 # DATA STRUCTURE
 HEADER = 'header'
-HEADER_SHORT = 'H'
+HEADER_SHORT = 'h'
 
 TIME = 'time'
-TIME_SHORT = 'T'
+TIME_SHORT = 't'
 
 ROTATION = 'rotation'
 POSITION = 'position'
@@ -106,6 +107,7 @@ FRAME = 'frame'
 X = 'x'
 Y = 'y'
 Z = 'z'
+W = 'w'
 
 TYPE = 0
 NAME = 1

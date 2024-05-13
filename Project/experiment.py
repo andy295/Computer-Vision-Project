@@ -217,11 +217,14 @@ class Experiment():
 
     print(f'Model(s) correctly prepared\n')
 
-  def plotData(self):
+  def plotData(self, models=None):
 
     print(f'Plotting data\n')
 
-    plotModels(self._inFile, self._models)
+    if models is None:
+      plotModels(self._inFile, models)
+    else:  
+      plotModels(self._inFile, self._models)
 
   # It ensures the sequential execution of the experiment steps and provides
   # a convenient way to run the entire experiment with a single method call.
@@ -230,9 +233,18 @@ class Experiment():
       data = self.importData()
 
       if data is not None:
-        data = self.prepareData(data)
+        self.prepareData(data)
 
         if len(self._models) > 0:
+          # for model in self._models:
+          #   data = []
+          #   data.append(model)
+
+          #   modelLR = linearRegressionCSV(model)
+          #   data.append(modelLR)
+
+          #   self.plotData(data)
+
           self.plotData()
 
           return True
