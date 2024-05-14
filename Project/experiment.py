@@ -222,9 +222,9 @@ class Experiment():
     print(f'Plotting data\n')
 
     if models is None:
-      plotModels(self._inFile, models)
-    else:  
       plotModels(self._inFile, self._models)
+    else:  
+      plotModels(self._inFile, models)
 
   # It ensures the sequential execution of the experiment steps and provides
   # a convenient way to run the entire experiment with a single method call.
