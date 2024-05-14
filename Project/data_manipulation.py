@@ -85,14 +85,14 @@ def extractDataCSV(data):
             if outerKey != HEADER:
                 middleDict[TIME] = {TIME_SHORT: times}
 
-        # for outerKey in sorted(dataDict.keys()):
-        #     print(outerKey + ':')
-        #     middleDict = dataDict[outerKey]
-        #     for middleKey in sorted(middleDict.keys()):
-        #         print('\t' + middleKey + ':')
-        #         innerDict = middleDict[middleKey]
-        #         for innerKey in sorted(innerDict.keys()):
-        #             print('\t\t' + innerKey + ':')#, innerDict[innerKey])
+        for outerKey in sorted(dataDict.keys()):
+            print(outerKey + ':')
+            middleDict = dataDict[outerKey]
+            for middleKey in sorted(middleDict.keys()):
+                print('\t' + middleKey + ':')
+                innerDict = middleDict[middleKey]
+                for innerKey in sorted(innerDict.keys()):
+                    print('\t\t' + innerKey + ':')#, innerDict[innerKey][0:3])
 
     except Exception as e:
         print(f'Error: Impossible to extract data from CSV file - {e}\n')

@@ -143,6 +143,8 @@ def readCSV(filePath):
 
       if data is not None:
         data = extractDataCSV(data)
+        # print('tipo: ', type(data))
+        # print(len(data))
 
   except Exception as e:
     print(f'Error: Impossible to read CSV file - {e}\n')

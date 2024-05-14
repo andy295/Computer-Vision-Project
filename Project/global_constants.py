@@ -55,13 +55,15 @@ SKELETON = 'skeleton'
 ANIMATION = 'animation'
 MARKER = 'marker'
 
-SRC_FILE = RIGID_BODY + EXTENSIONS[Extension.csv]
-# SRC_FILE = SKELETON + EXTENSIONS[Extension.csv]
+# SRC_FILE = RIGID_BODY + EXTENSIONS[Extension.csv]
+SRC_FILE = SKELETON + EXTENSIONS[Extension.csv]
 # SRC_FILE = ANIMATION + EXTENSIONS[Extension.bvh]
 # SRC_FILE = MARKER + EXTENSIONS[Extension.c3d]
 
 # PATHS
-SRC_PATH = 'Data/60fps'
+# SRC_PATH = 'Data/60fps'
+SRC_PATH = r'C:\Users\utente\Documents\VitaaTrento\Anno1Semestre2\ComputerVision\progettoCV\Computer-Vision-Project\Project\Data'
+
 
 SRC_PATH = os.path.join(ROOT_DIR, SRC_PATH) 
 INPUT_FILE = os.path.join(SRC_PATH, SRC_FILE)

@@ -4,9 +4,10 @@ import numpy as np
 from global_constants import *
 
 def plotModels(filePath=None, data=None):
-
     if data is None or filePath is None:
-        print(f'Error: Invalid data or file path\n')
+      if data is None:
+        print("data is none")
+      print(f'Error: Invalid data or file path\n')
 
     fName = os.path.basename(filePath)
 
@@ -50,7 +51,7 @@ def getIndex(start, dictionary):
   return -1 
 
 
-def visualizeSequence(visualizer, markersList):
+def visualizeAndSaveSequence(visualizer, markersList):
   # Iteration over all the point clouds
   for marker in markersList:
     visualizer.clear_geometries() #clears any existing geometries from the visualizer
@@ -75,65 +76,26 @@ def setVisualizer(pointSize):
   return visualizer
 
 
-#this function plots the rigid body markers
+#plots the rigid body markers
 def markerRigidBodyPlot(data):
-    #rigidBodyMarker = []
     points1 = []
     points2 = []
     points3 = []
     points4 = []
     allMarkers = []
-
-    #                 dictionary[str, dict[str, dict[str, list]]], 
-    #                           .          .         .        .
-    #                          .           .          .         .
-    #                         .            .           .          .
-    #                      marker1      Position       x          [x1, x2, x3, ...]
-    #                    marker2     MarkerQuality     y           [y1, y2, y3, ...]
-
-    #dataList = list(data.items())
-    for key, value in data.items():
-
-      # This is for extracting the Rigid body point but it's almost the same point as marker 4
-      #if key == 'Rigid_Body-Ragnetto-54A2169DEC4611EE5F75BB645DD45CA7':
-      #  print(f'Key rbr: {key}')
-      #   for key2, value2 in value.items():
-      #    if key2 == 'Position':
-      #      rigidBodyMarker = list(zip(value2['X'], value2['Y'], value2['Z']))
-
-      #we search for the key corresponding to the marker we want to use, 
-      #then we move to its value (another dictionary)
-      if key == 'Rigid_Body_Marker-Ragnetto:Marker1-54A2169DEC4611EE5F75BB645DD45CA7':
-        for key2, value2 in value.items(): 
-          if key2 == 'Position':
-            points1 = list(zip(value2['X'], value2['Y'], value2['Z'])) #transform from
-                        # dictionary[(X:x1,x2...), (Y:y1,y2...), (Z:z1,z2...)] to list of tuples (list[x, y, z])
-
-      if key == 'Rigid_Body_Marker-Ragnetto:Marker2-54A2169DEC4611EE5F75BB645DD45CA7':
-        for key2, value2 in value.items():
-          if key2 == 'Position':
-            points2 = list(zip(value2['X'], value2['Y'], value2['Z'])) #transform from
-                        # dictionary[(X:x1,x2...), (Y:y1,y2...), (Z:z1,z2...)] to list of tuples (list[x, y, z])
-
-      if key == 'Rigid_Body_Marker-Ragnetto:Marker3-54A2169DEC4611EE5F75BB645DD45CA7':
-        for key2, value2 in value.items():
-          if key2 == 'Position':
-            points3 = list(zip(value2['X'], value2['Y'], value2['Z'])) #transform from
-                        # dictionary[(X:x1,x2...), (Y:y1,y2...), (Z:z1,z2...)] to list of tuples (list[x, y, z])
-
-      if key == 'Rigid_Body_Marker-Ragnetto:Marker4-54A2169DEC4611EE5F75BB645DD45CA7':
-        for key2, value2 in value.items(): 
-          if key2 == 'Position':
-            points4 = list(zip(value2['X'], value2['Y'], value2['Z'])) #transform from
-                        # dictionary[(X:x1,x2...), (Y:y1,y2...), (Z:z1,z2...)] to list of tuples (list[x, y, z])
-
+    
+    # transform from dictionary[(X:x1,x2...), (Y:y1,y2...), (Z:z1,z2...)] to list of tuples (list[x, y, z])  
+    points1 = list(zip(data[1]._positions['x'], data[1]._positions['y'], data[1]._positions['z']))
+    points2 = list(zip(data[2]._positions['x'], data[2]._positions['y'], data[2]._positions['z']))
+    points3 = list(zip(data[3]._positions['x'], data[3]._positions['y'], data[3]._positions['z']))
+    points4 = list(zip(data[4]._positions['x'], data[4]._positions['y'], data[4]._positions['z']))
     allMarkers = list(zip(points1, points2, points3, points4)) #list of tuples [xyz, xyz, xyz, xyz],
                                                               #where each tuple is a point cloud
 
     # Creation of the visualizer object (the visualization window)
     visualizer = setVisualizer(10.0)
 
-    visualizeSequence(visualizer, allMarkers)
+    visualizeAndSaveSequence(visualizer, allMarkers)
 
 
 def skeletonMarkerPlot(data):
@@ -145,22 +107,26 @@ def skeletonMarkerPlot(data):
     #                         .            .           .          .
     #                      marker1      Position       x          [x1, x2, x3, ...]
     #                    marker2     MarkerQuality     y           
-    for key, value in data.items():
+    #for key, value in data.items():
       #we search for the key corresponding to the marker we want to use, 
       #then we move to its value (another dictionary)
-      if 'Marker' in key:
-        for key2, value2 in value.items():
-          if key2 == 'Position':
-            points = list(zip(value2['X'], value2['Y'], value2['Z'])) #transform from
-                        # dictionary[(X:x1,x2...), (Y:y1,y2...), (Z:z1,z2...)] to list of tuples (list[x, y, z])
-            bonesMarkerList.append(points) #transform from list of tuples to list of lists
+      # if 'Marker' in key:
+      #   for key2, value2 in value.items():
+      #     if key2 == 'Position':
+      #       points = list(zip(value2['X'], value2['Y'], value2['Z'])) #transform from
+      #                   # dictionary[(X:x1,x2...), (Y:y1,y2...), (Z:z1,z2...)] to list of tuples (list[x, y, z])
+      #       bonesMarkerList.append(points) #transform from list of tuples to list of lists
+    for model in data:
+      if 'Marker' in model._description:
+        points = list(zip(model._positions['x'], model._positions['y'], model._positions['z']))
+        bonesMarkerList.append(points)
 
     bonesMarkerList = list(zip(*bonesMarkerList)) #list of tuples [xyz, xyz, xyz, xyz]
 
     # Creation of the visualizer window
     visualizer = setVisualizer(12.0)
 
-    visualizeSequence(visualizer, bonesMarkerList)
+    visualizeAndSaveSequence(visualizer, bonesMarkerList)
 
 
 def skeletonJointsPlot(data):

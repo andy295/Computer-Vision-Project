@@ -220,8 +220,8 @@ class Experiment():
   def plotData(self, models=None):
 
     print(f'Plotting data\n')
-
-    if models is None:
+    #print('self._models:', type(self._models))
+    if models is not None: 
       plotModels(self._inFile, models)
     else:  
       plotModels(self._inFile, self._models)
