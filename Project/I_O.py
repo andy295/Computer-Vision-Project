@@ -139,7 +139,7 @@ def readCSV(filePath):
 
     with open(filePath, READ) as f:
       for line in csv.reader(f):
-       data.append(line)
+        data.append(line)
 
       if data is not None:
         data = extractDataCSV(data)

@@ -1,5 +1,6 @@
 import open3d as o3d
 import numpy as np
+import imageio
 
 from global_constants import *
 
@@ -15,7 +16,8 @@ def plotModels(filePath=None, data=None):
     if fExt == EXTENSIONS[Extension.csv]:
 
       if fName == RIGID_BODY:
-        markerRigidBodyPlot(data)
+        markerRigidBodyPlot(data, fName)
+        return True
 
       elif fName == SKELETON:
 
@@ -28,12 +30,14 @@ def plotModels(filePath=None, data=None):
           option = input("Enter your choice: ")
           if option == '1':
             print("Skeleton with markers")
+            skeletonMarkerPlot(data, fName)
             return True
-            skeletonMarkerPlot(data)
+            
           elif option == '2':
             print("Skeleton joints")
+            skeletonJointsPlot(data, fName)
             return True
-            skeletonJointsPlot(data)
+            
           elif option == '0':
               break  # Exit the loop and end the program
           else:
@@ -51,7 +55,8 @@ def getIndex(start, dictionary):
   return -1 
 
 
-def visualizeAndSaveSequence(visualizer, markersList):
+def visualizeAndSaveSequence(visualizer, markersList, fName):
+  images=[]
   # Iteration over all the point clouds
   for marker in markersList:
     visualizer.clear_geometries() #clears any existing geometries from the visualizer
@@ -61,8 +66,16 @@ def visualizeAndSaveSequence(visualizer, markersList):
     visualizer.update_geometry(pcd) 
     visualizer.poll_events() 
     visualizer.update_renderer()
+    
+  # images = np.array(images)
+  # for img in images:
+  #   img = (img[..., :3] * 255).astype(np.uint8) #convert to rgb
+  # if os.path.exists(SAVE_VIDEO_PATH+fName):
+  #   return
+  # imageio.mimsave(SAVE_VIDEO_PATH+fName, images, fps=FPS) #save the images as a video
 
   visualizer.destroy_window()
+  
 
 
 def setVisualizer(pointSize):
@@ -77,7 +90,7 @@ def setVisualizer(pointSize):
 
 
 #plots the rigid body markers
-def markerRigidBodyPlot(data):
+def markerRigidBodyPlot(data, fName):
     points1 = []
     points2 = []
     points3 = []
@@ -95,41 +108,26 @@ def markerRigidBodyPlot(data):
     # Creation of the visualizer object (the visualization window)
     visualizer = setVisualizer(10.0)
 
-    visualizeAndSaveSequence(visualizer, allMarkers)
+    visualizeAndSaveSequence(visualizer, allMarkers, fName)
 
 
-def skeletonMarkerPlot(data):
+def skeletonMarkerPlot(data, fName):
+  
     bonesMarkerList = []
-
-    #                dictionary[str, dict[str, dict[str, list]]]
-    #                           .          .         .        .
-    #                          .           .          .         .
-    #                         .            .           .          .
-    #                      marker1      Position       x          [x1, x2, x3, ...]
-    #                    marker2     MarkerQuality     y           
-    #for key, value in data.items():
-      #we search for the key corresponding to the marker we want to use, 
-      #then we move to its value (another dictionary)
-      # if 'Marker' in key:
-      #   for key2, value2 in value.items():
-      #     if key2 == 'Position':
-      #       points = list(zip(value2['X'], value2['Y'], value2['Z'])) #transform from
-      #                   # dictionary[(X:x1,x2...), (Y:y1,y2...), (Z:z1,z2...)] to list of tuples (list[x, y, z])
-      #       bonesMarkerList.append(points) #transform from list of tuples to list of lists
     for model in data:
-      if 'Marker' in model._description:
+      if model._description['Type'] == 'Bone Marker':
         points = list(zip(model._positions['x'], model._positions['y'], model._positions['z']))
         bonesMarkerList.append(points)
 
     bonesMarkerList = list(zip(*bonesMarkerList)) #list of tuples [xyz, xyz, xyz, xyz]
 
     # Creation of the visualizer window
-    visualizer = setVisualizer(12.0)
+    visualizer = setVisualizer(8.0)
 
-    visualizeAndSaveSequence(visualizer, bonesMarkerList)
+    visualizeAndSaveSequence(visualizer, bonesMarkerList, fName)
 
 
-def skeletonJointsPlot(data):
+def skeletonJointsPlot(data, fName):
 
   bonesPosDict = {}
   jointsGraph = {
@@ -155,14 +153,11 @@ def skeletonJointsPlot(data):
     'RFoot' : ['RToe'],
     #'RToe' : ['RFoot'] #we know  toe is not connected to anything new
   }
-
-  #create a dictionary[boneName, list of points] from data
-  for key, value in data.items(): #key is the bone name in the dictionary
-    if 'Marker' not in key: #exclude the markers and get only the bone points
-      for key2, value2 in value.items(): 
-        if key2 == 'Position':
-          points = list(zip(value2['X'], value2['Y'], value2['Z']))
-          bonesPosDict[key] = points #create a dictionary[boneName, list of points]
+  
+  for model in data:
+    if model._description['Type'] != 'Bone Marker':
+      points = list(zip(model._positions['x'], model._positions['y'], model._positions['z']))
+      bonesPosDict[model._description['Name']] = points
 
   # Get the lists of points from the dictionary values
   lists_of_points = list(bonesPosDict.values())
