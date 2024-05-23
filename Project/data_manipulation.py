@@ -1,3 +1,4 @@
+import cv2
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
@@ -193,7 +194,79 @@ def linearRegression(sourceModel):
     model._positions[Y] = df[Y]
     model._positions[Z] = df[Z]
 
+    # plot the results
     plotData("Regression Line", sourceModel, model)
+
+    return model
+
+# Function to compute the Kalman filter to estimate missing values
+def kalmanFilter(sourceModel):
+    
+    model = sourceModel.deepcopy()
+
+    # input data
+    data = {
+        TIME_SHORT: model._time,
+        X: model._positions[X],
+        Y: model._positions[Y],
+        Z: model._positions[Z]
+    }
+
+    # convert to pandas DataFrame
+    df = pd.DataFrame(data)
+
+    # time step, we are assuming it constant for simplicity
+    dt = df[TIME_SHORT].diff().mean()
+    dtTo2 = 0.5 * dt**2
+
+    # instantiate and initialize the Kalman filter
+    kalman = cv2.KalmanFilter(9, 3)
+    kalman.measurementMatrix = np.array([
+        [1, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0, 0]], np.float32)
+
+    kalman.transitionMatrix = np.array([
+        [1, 0, 0, dt, 0, 0, dtTo2, 0, 0],
+        [0, 1, 0, 0, dt, 0, 0, dtTo2, 0],
+        [0, 0, 1, 0, 0, dt, 0, 0, dtTo2],
+        [0, 0, 0, 1, 0, 0, dt, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, dt, 0],
+        [0, 0, 0, 0, 0, 1, 0, 0, dt],
+        [0, 0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 1]], np.float32)
+
+    processNoiseStD = 0.1
+    kalman.processNoiseCov = np.eye(9, dtype=np.float32) * processNoiseStD
+
+    measurementNoiseStD = 0.001
+    kalman.measurementNoiseCov = np.eye(3, dtype=np.float32) * measurementNoiseStD
+
+    # prepare storage for estimated results
+    estimatedCoords = np.zeros((len(df), 3), dtype=np.float32)
+
+    for i, row in df.iterrows():
+        if row[X] == 0.0 and row[Y] == 0.0 and row[Z] == 0.0:
+            kalman.predict()
+        else:
+            measurement = np.array([row[X], row[Y], row[Z]], dtype=np.float32)
+            kalman.predict()
+            kalman.correct(measurement)
+
+        estimatedCoords[i] = kalman.statePost[:3].flatten()
+
+    # fill in the missing coordinates in the DataFrame
+    df_estimated = df.copy()
+    df_estimated[[X, Y, Z]] = estimatedCoords
+
+    # copy the data back to the model
+    model._positions[X] = df_estimated[X]
+    model._positions[Y] = df_estimated[Y]
+    model._positions[Z] = df_estimated[Z]
+
+    # plot the results
+    plotData("Kalman Filter", sourceModel, model)
 
     return model
 
