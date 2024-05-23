@@ -1,5 +1,4 @@
 import open3d as o3d
-import numpy as np
 import imageio
 
 from global_constants import *
@@ -32,12 +31,12 @@ def plotModels(filePath=None, data=None):
             print("Skeleton with markers")
             skeletonMarkerPlot(data, fName)
             return True
-            
+
           elif option == '2':
             print("Skeleton joints")
             skeletonJointsPlot(data, fName)
             return True
-            
+
           elif option == '0':
               break  # Exit the loop and end the program
           else:
@@ -75,7 +74,6 @@ def visualizeAndSaveSequence(visualizer, markersList, fName):
   # imageio.mimsave(SAVE_VIDEO_PATH+fName, images, fps=FPS) #save the images as a video
 
   visualizer.destroy_window()
-  
 
 
 def setVisualizer(pointSize):
@@ -112,7 +110,7 @@ def markerRigidBodyPlot(data, fName):
 
 
 def skeletonMarkerPlot(data, fName):
-  
+
     bonesMarkerList = []
     for model in data:
       if model._description['Type'] == 'Bone Marker':
@@ -153,7 +151,7 @@ def skeletonJointsPlot(data, fName):
     'RFoot' : ['RToe'],
     #'RToe' : ['RFoot'] #we know  toe is not connected to anything new
   }
-  
+
   for model in data:
     if model._description['Type'] != 'Bone Marker':
       points = list(zip(model._positions['x'], model._positions['y'], model._positions['z']))

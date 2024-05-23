@@ -1,3 +1,7 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
 from global_constants import *
 from utils import *
 
@@ -6,6 +10,7 @@ from utils import *
 # and error handling.
 # Finally, it returns a dictionary containing the extracted data or None in case of errors.
 def extractDataCSV(data):
+
     times = []
     dataDict = {HEADER: {HEADER_SHORT: {}}}
 
@@ -135,3 +140,94 @@ def extractDataC3D(dataReader):
         return None
 
     return data
+
+# Function to prepare data by separating into training and test sets
+def prepareData(df, column):
+
+    # training data: drop rows where the target column is 0.0
+    trainDF = df[df[column] != 0.0]
+    XTrain = trainDF[TIME_SHORT].values.reshape(-1, 1)
+    yTrain = trainDF[column].values
+
+    # test data: rows where the target column is 0.0
+    testDF = df[df[column] == 0.0]
+    XTest = testDF[TIME_SHORT].values.reshape(-1, 1)
+
+    return XTrain, yTrain, XTest, testDF.index
+
+# Function to perform linear regression and predict missing values
+def linearRegressionPredict(df, column):
+
+    XTrain, yTrain, XTest, testIndex = prepareData(df, column)
+
+    model = LinearRegression()
+    model.fit(XTrain, yTrain)
+
+    predictions = model.predict(XTest)
+
+    # fill the missing values with predictions
+    df.loc[testIndex, column] = predictions
+
+# Function to compute the linear regression to estimate missing values
+def linearRegression(sourceModel):
+
+    model = sourceModel.deepcopy()
+
+    # input data
+    data = {
+        TIME_SHORT: model._time,
+        X: model._positions[X],
+        Y: model._positions[Y],
+        Z: model._positions[Z]
+    }
+
+    # convert to pandas DataFrame
+    df = pd.DataFrame(data)
+
+    # perform linear regression for each coordinate
+    for coord in [X, Y, Z]:
+        linearRegressionPredict(df, coord)
+
+    # copy the data back to the model
+    model._positions[X] = df[X]
+    model._positions[Y] = df[Y]
+    model._positions[Z] = df[Z]
+
+    plotData("Regression Line", sourceModel, model)
+
+    return model
+
+def plotData(operation, first, second=None):
+
+    # extract data
+    X1 = np.array(first._positions[X])
+    Y1 = np.array(first._positions[Y])
+    Z1 = np.array(first._positions[Z])
+
+    if second is not None:
+        X2 = np.array(second._positions[X])
+        Y2 = np.array(second._positions[Y])
+        Z2 = np.array(second._positions[Z])
+
+    # plot the results in 3D on two separate charts
+    fig = plt.figure(figsize=(14, 6))
+
+    # plot for original data
+    ax1 = fig.add_subplot(1, 2, 1, projection='3d')
+    ax1.scatter(X1, Y1, Z1, c='r', label='Original Data')
+    ax1.set_xlabel(X)
+    ax1.set_ylabel(Y)
+    ax1.set_zlabel(Z)
+    ax1.set_title('Original Data')
+
+    if second is not None:
+        # plot for new data
+        ax2 = fig.add_subplot(1, 2, 2, projection='3d')
+        ax2.scatter(X2, Y2, Z2, c='b', label=f'{operation} Data')
+        ax2.set_xlabel(X)
+        ax2.set_ylabel(Y)
+        ax2.set_zlabel(Z)
+        ax2.set_title(f'{operation} Data')
+
+    plt.tight_layout()
+    plt.show()

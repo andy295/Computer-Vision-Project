@@ -237,13 +237,13 @@ class Experiment():
 
         if len(self._models) > 0:
           # for model in self._models:
-          #   data = []
-          #   data.append(model)
+          #   modelsList = []
+          #   modelsList.append(model)
 
-          #   modelLR = linearRegressionCSV(model)
-          #   data.append(modelLR)
+          #   newModel = linearRegression(model)
+          #   modelsList.append(newModel)
 
-          #   self.plotData(data)
+          #   self.plotData(modelsList)
 
           self.plotData()
 

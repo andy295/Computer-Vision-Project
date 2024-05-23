@@ -1,6 +1,8 @@
 import os
 import sys
 import copy
+import platform
+import numpy as np
 
 from enum import IntEnum
 
@@ -61,10 +63,15 @@ SRC_FILE = RIGID_BODY + EXTENSIONS[Extension.csv]
 # SRC_FILE = MARKER + EXTENSIONS[Extension.c3d]
 
 # PATHS
-# SRC_PATH = 'Data/60fps'
-SRC_PATH = r'C:\Users\utente\Documents\VitaaTrento\Anno1Semestre2\ComputerVision\progettoCV\Computer-Vision-Project\Project\Data'
-SAVE_VIDEO_PATH = r'C:\Users\utente\Documents\VitaaTrento\Anno1Semestre2\ComputerVision\progettoCV\Computer-Vision-Project\Project\Video\\'
-FPS = 30
+if platform.system() == 'Linux':
+    SRC_PATH = 'Data/60fps'
+elif platform.system() == 'Windows':
+    SRC_PATH = r'C:\Users\utente\Documents\VitaaTrento\Anno1Semestre2\ComputerVision\progettoCV\Computer-Vision-Project\Project\Data'
+    SAVE_VIDEO_PATH = r'C:\Users\utente\Documents\VitaaTrento\Anno1Semestre2\ComputerVision\progettoCV\Computer-Vision-Project\Project\Video\\'
+    FPS = 30
+else:
+    print('Error: Unsupported OS')
+    sys.exit()
 
 SRC_PATH = os.path.join(ROOT_DIR, SRC_PATH) 
 INPUT_FILE = os.path.join(SRC_PATH, SRC_FILE)

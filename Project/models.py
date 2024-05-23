@@ -102,6 +102,17 @@ class CSVModel:
         for key, value in self._positions.items():
             print(f"\t{key.replace(SPACE_REPLACEMENT, ' ')}: {len(value)}")
 
+    def deepcopy(self):
+
+        newModel = CSVModel()
+
+        newModel._description = copy.deepcopy(self._description)
+        newModel._time = copy.deepcopy(self._time)
+        newModel._rotations = copy.deepcopy(self._rotations)
+        newModel._positions = copy.deepcopy(self._positions)
+
+        return newModel
+
 # Class designed to represent and provide information about a model 
 # derived from BVH data by encapsulating functionality for computing 
 # different operations on the data, such as initializing the model
