@@ -1,6 +1,8 @@
-from I_O import *
-from models import *
-from plotter import *
+from global_constants import *
+from I_O import readData
+from models import createModels
+from plotter import plotData
+from data_manipulation import filterData
 
 # The Experiment class represents an experiment with datasets and models.
 # It provides functionality to initialize and manage an experiment.
@@ -209,7 +211,7 @@ class Experiment():
 
   # It is responsible for formatting data and creating models.
   # It involves some preprocessing of the data.
-  def prepareData(self, data):
+  def prepareModels(self, data):
 
     print(f'Preparing data\n')
 
@@ -217,14 +219,22 @@ class Experiment():
 
     print(f'Model(s) correctly prepared\n')
 
-  def plotData(self, models=None):
+  def plotModelsData(self, models=None):
 
     print(f'Plotting data\n')
 
     if models is None:
-      plotModels(self._inFile, self._models)
+      plotData(self._inFile, self._models)
     else:  
-      plotModels(self._inFile, models)
+      plotData(self._inFile, models)
+
+  def filterModelsData(self):
+
+    print(f'Filtering data\n')
+
+    filterData(self._inFile, self._models)
+  
+    print(f'Data correctly filtered\n')
 
   # It ensures the sequential execution of the experiment steps and provides
   # a convenient way to run the entire experiment with a single method call.
@@ -233,19 +243,11 @@ class Experiment():
       data = self.importData()
 
       if data is not None:
-        self.prepareData(data)
+        self.prepareModels(data)
 
         if len(self._models) > 0:
-          # for model in self._models:
-          #   modelsList = []
-          #   modelsList.append(model)
-
-          #   newModel = linearRegression(model)
-          #   modelsList.append(newModel)
-
-          #   self.plotData(modelsList)
-
-          self.plotData()
+          self.filterModelsData()
+          self.plotModelsData()
 
           return True
 

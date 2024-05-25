@@ -48,9 +48,77 @@ class CSVModel:
         self._time = [] # seconds
         self._rotations = {}
         self._positions = {}
+        self._kfPositions = {}
+        self._rlPositions = {}
+        self._splPositions = {}
 
         if data is not None:
             self.initialize(data, header)
+
+    @property
+    def description(self):
+        return self._description
+
+    @description.setter
+    def description(self, s):
+        print(f'Error: Invalid operation, model description cannot be manually modified\n')
+
+    @property
+    def time(self):
+        return self._time
+
+    @time.setter
+    def time(self, t):
+        print(f'Error: Invalid operation, model time dictionary cannot be manually modified\n')
+
+    @property
+    def rotations(self):
+        return self._rotations
+
+    @rotations.setter
+    def rotations(self, s):
+        print(f'Error: Invalid operation, model rotations dictionary cannot be manually modified\n')
+
+    @property
+    def positions(self):
+        return self._positions
+
+    @positions.setter
+    def positions(self, s):
+        print(f'Error: Invalid operation, model positions dictionary cannot be manually modified\n')
+
+    @property
+    def kfPositions(self):
+        return self._kfPositions
+
+    @kfPositions.setter
+    def kfPositions(self, s):
+        self._kfPositions = s
+
+    @property
+    def rlPositions(self):
+        return self._rlPositions
+
+    @rlPositions.setter
+    def rlPositions(self, s):
+        self._rlPositions = s
+
+    @property
+    def splPositions(self):
+        return self._splpositions
+
+    @splPositions.setter
+    def splPositions(self, s):
+        self._splPositions = s
+
+    def getName(self):
+        return self._description['Name']
+
+    def getType(self):
+        return self._description['Type']
+
+    def getID(self):
+        return self._description['ID']
 
     # It initializes the data object.
     def initialize(self, data, header=None):
@@ -110,6 +178,9 @@ class CSVModel:
         newModel._time = copy.deepcopy(self._time)
         newModel._rotations = copy.deepcopy(self._rotations)
         newModel._positions = copy.deepcopy(self._positions)
+        newModel._kfPositions = copy.deepcopy(self._kfPositions)
+        newModel._rlPositions = copy.deepcopy(self._rlPositions)
+        newModel._splPositions = copy.deepcopy(self._splPositions)
 
         return newModel
 
