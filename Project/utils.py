@@ -28,3 +28,15 @@ def extractFirstLetters(string):
     result = ''.join(first_letters)
 
     return result
+
+# Function to safely convert user input to an integer
+def getIntegerInput(text):
+    while True:
+        value = input(text)
+        try:
+            # Attempt to convert the input to an integer
+            value = int(value)
+            return value
+        except ValueError:
+            # If conversion fails, inform the user and prompt again
+            print('Invalid input. Please enter a valid integer.\n')

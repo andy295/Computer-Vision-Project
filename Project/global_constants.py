@@ -6,13 +6,7 @@ import numpy as np
 
 from enum import IntEnum
 
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-BHV_DIR = "bvh_reader"
-folderPath = os.path.join(ROOT_DIR, BHV_DIR)
-
-sys.path.append(folderPath)
-
-from BVH_FILE import *
+from utils import *
 
 # FILE EXTENSIONS
 class Extension(IntEnum):
@@ -73,6 +67,7 @@ else:
     print('Error: Unsupported OS')
     sys.exit()
 
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_PATH = os.path.join(ROOT_DIR, SRC_PATH) 
 INPUT_FILE = os.path.join(SRC_PATH, SRC_FILE)
 
@@ -91,6 +86,7 @@ CSV_DATA_COLUMN = 2 # data column start number
 IGNORE_DATA = ['Marker'] # columns to be ignored
 
 # BVH STRUCTURE
+BHV_DIR = "bvh_reader"
 ANIMATION = 'animation'
 NAMES = 'names'
 

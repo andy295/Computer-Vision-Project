@@ -4,14 +4,11 @@ import cv2
 
 from global_constants import *
 
-def plotModels(filePath=None, data=None):
+def plotData(filePath=None, data=None):
     if data is None or filePath is None:
-      if data is None:
-        print("data is none")
       print(f'Error: Invalid data or file path\n')
 
     fName = os.path.basename(filePath)
-
     fName, fExt = os.path.splitext(fName)
     if fExt == EXTENSIONS[Extension.csv]:
 
@@ -22,26 +19,28 @@ def plotModels(filePath=None, data=None):
       elif fName == SKELETON:
 
         while True:
-          print("Please select the type of skeleton visualization:")
-          print("1. Skeleton with markers")
-          print("2. Skeleton joints")
-          print("0. Exit the program")
+          print(f'Please select the type of skeleton visualization:')
+          print(f'1. Skeleton with markers')
+          print(f'2. Skeleton joints')
+          print(f'0. Exit the program')
 
-          option = input("Enter your choice: ")
+          option = input(f'Enter your choice: ')
           if option == '1':
-            print("Skeleton with markers")
+            print(f'Skeleton with markers')
             skeletonMarkerPlot(data, fName)
             return True
 
           elif option == '2':
-            print("Skeleton joints")
+            print(f'Skeleton joints')
             skeletonJointsPlot(data, fName)
             return True
 
           elif option == '0':
-              break  # Exit the loop and end the program
+            # exit the loop and end the program
+            break
+
           else:
-              print("Invalid input, try again.")
+              print(f'Invalid input, try again.')
 
     else:
         print(f'Error: Invalid file extension: {fExt}\n')

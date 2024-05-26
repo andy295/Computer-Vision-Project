@@ -1,149 +1,69 @@
 import cv2
+import string
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 
 from global_constants import *
-from utils import *
 
-# Function to extract and process data from a pre-acquired CSV file.
-# It handles header extraction, version checking, time extraction, data processing,
-# and error handling.
-# Finally, it returns a dictionary containing the extracted data or None in case of errors.
-def extractDataCSV(data):
+def filterData(filePath, data):
 
-    times = []
-    dataDict = {HEADER: {HEADER_SHORT: {}}}
-
-    # extract the header of the file and check if the version is compatible
-    try:
-        # the file is structured in a way that the even columns contain the 
-        # description of the data, while the odd columns contain the data
-        for row in data[:CSV_HEADER_FILE_LEN]:
-            for i in range(0, len(row), 2):
-                if row[i] != '':
-                    key = row[i].replace(' ', SPACE_REPLACEMENT)
-                    value = row[i + 1]
-
-                    if (i+1) == CSV_VERSION_COLUMN and value != CSV_VERSION:
-                        raise CustomException(f'Error: CSV file version {value} is not supported\n')
-
-                    dataDict[HEADER][HEADER_SHORT][key] = value
-
-        # remove the header of the file
-        # we don't need it anymore
-        for i in range(CSV_HEADER_DATA_ROW):
-            del data[0]
-
-        # save the information about the time
-        # which will be common for all
-        # in the csv file, the time is always the comlumn before the data
-        # convert the string to float
-        for row in data[CSV_HEADER_DATA_LEN:]:
-            times.append(0 if row[CSV_DATA_COLUMN-1] == '' else float(row[CSV_DATA_COLUMN-1]))
-
-        # transpose the data and remove the first two rows
-        # we don't need them anymore
-        data = list(zip(*data))
-        for i in range(CSV_DATA_COLUMN):
-            del data[0]
-
-        # create a dictionary of dictionaries with the data
-        # the first key is the combination of the first CSV_HEADER_DATA_LEN-1 elements
-        # of the header; -1 because we want to use the last element of the header
-        # as the key for the sub-dictionary
-        for row in data:
-
-            # CSV file can contain some data that we want to ignore
-            # we can specify the type of data to ignore in the IGNORE_DATA list
-            if row[TYPE] in IGNORE_DATA:
-                continue
-
-            outerKey = ''
-            middleKey = ''
-            innerKey = ''
-            for i in range(CSV_HEADER_DATA_LEN):
-
-                if i < CSV_HEADER_DATA_LEN-2:
-                    tmpStr = row[i].replace(' ', SPACE_REPLACEMENT)
-                    outerKey += tmpStr
-                    outerKey = outerKey + KEY_SEPARATOR if i < CSV_HEADER_DATA_LEN-3 else outerKey
-
-                elif i < CSV_HEADER_DATA_LEN-1:
-                    tmpStr = row[i].replace(' ', SPACE_REPLACEMENT)
-                    middleKey += tmpStr.lower()
-
-                else:
-                    innerKey = row[CSV_HEADER_DATA_LEN-1] if row[CSV_HEADER_DATA_LEN-1] != '' else extractFirstLetters(row[CSV_HEADER_DATA_LEN-2])
-                    innerKey = innerKey.lower()
-                    values = [float(x) if x != '' else float(0) for x in row[CSV_HEADER_DATA_LEN:]]
-
-            if outerKey in dataDict:
-                if middleKey in dataDict[outerKey]:
-                    dataDict[outerKey][middleKey][innerKey] = values
-                else:
-                    dataDict[outerKey][middleKey] = {innerKey: values}
-            else:
-                dataDict[outerKey] = {middleKey: {innerKey: values}}
-
-        # finally add to each middle dictionary the time
-        for outerKey, middleDict in dataDict.items():
-            if outerKey != HEADER:
-                middleDict[TIME] = {TIME_SHORT: times}
-
-        for outerKey in sorted(dataDict.keys()):
-            print(outerKey + ':')
-            middleDict = dataDict[outerKey]
-            for middleKey in sorted(middleDict.keys()):
-                print('\t' + middleKey + ':')
-                innerDict = middleDict[middleKey]
-                for innerKey in sorted(innerDict.keys()):
-                    print('\t\t' + innerKey + ':')#, innerDict[innerKey][0:3])
-
-    except Exception as e:
-        print(f'Error: Impossible to extract data from CSV file - {e}\n')
-        dataDict = None
-
-    return dataDict
-
-# Function to extract data from a C3D file using a provided dataReader
-# capable of reading C3D files.
-# It extracts point rate, scale factor, and frames data.
-# If the extraction process is successful, it returns a dictionary containing the data.
-# Otherwise, it returns None.
-def extractDataC3D(dataReader):
-
-    data = {C3D_POINT_RATE: 0, C3D_SCALE_FACTOR : 0, FRAME : {}}
-    try:
-
-        data[C3D_POINT_RATE] = dataReader.point_rate
-        point_scale = abs(dataReader.point_scale)
-        data[C3D_SCALE_FACTOR] = point_scale
-        for i, points, analog in dataReader.read_frames():
-
-            frameData = {}
-            for (x, y, z, err_est, cam_nr), label in zip(points, 
-                                        dataReader.point_labels):
-
-                label = label.strip()
-                frameData[label] = {
-                    X : x * point_scale,
-                    Y : y * point_scale,
-                    Z : z * point_scale,
-                    C3D_ERR_EST: err_est,
-                    C3D_CAMERA_NR: cam_nr
-                }
-
-            data[FRAME][i] = frameData
-
-    except Exception as e:
-        print(f'Error: Impossible to extract data from C3D file - {e}')
+    if data is None or filePath is None:
+        print(f'Error: Invalid data or file path\n')
         return None
 
-    return data
+    fName = os.path.basename(filePath)
+    fName, fExt = os.path.splitext(fName)
+
+    # only data extracted from rigidbody.csv file can be filtered
+    if fExt == EXTENSIONS[Extension.csv] and fName == RIGID_BODY:
+
+        option = 1
+        while True:
+            text = f'Models that can be filtered:\n'
+            text += f'0. Exit\n'
+            text += f'1. All\n'
+            for idx, model in enumerate(data):
+                text += f'{idx+2}. {model.getName()}\n'
+
+            text += f'Please select the model to filter:'
+            option = getIntegerInput(text)        
+            if option == 0:
+                # exit the loop and end the program
+                break
+
+            elif option == 1:
+
+                for model in data:
+                    print(f'Filtering data for model: {model.getName()}')
+                    linearRegression(model)
+                    kalmanFilter(model)
+                    print(f'Data correctly filtered\n')
+
+                break
+
+            elif option > 1 and option < len(data) + 2:
+
+                for idx, model in enumerate(data):
+                    if option == idx + 2:
+                        print(f'Filtering data for model: {model.getName()}')
+                        linearRegression(model)
+                        kalmanFilter(model)
+                        print(f'Data correctly filtered\n')
+
+                exit = f'Would you like to filter another model?\n'
+                exit += f'0 to No\n'
+                exit += f'Any integer to Yes\n'
+                exit += f'Make your choice: '
+                exit = getIntegerInput(exit)
+                if exit == 0:
+                    # exit the loop and end the program
+                    break
+            else:
+                print(f'Invalid input, try again.')
 
 # Function to prepare data by separating into training and test sets
-def prepareData(df, column):
+def linearRegressionPrepareData(df, column):
 
     # training data: drop rows where the target column is 0.0
     trainDF = df[df[column] != 0.0]
@@ -159,7 +79,7 @@ def prepareData(df, column):
 # Function to perform linear regression and predict missing values
 def linearRegressionPredict(df, column):
 
-    XTrain, yTrain, XTest, testIndex = prepareData(df, column)
+    XTrain, yTrain, XTest, testIndex = linearRegressionPrepareData(df, column)
 
     model = LinearRegression()
     model.fit(XTrain, yTrain)
@@ -176,10 +96,10 @@ def linearRegression(sourceModel):
 
     # input data
     data = {
-        TIME_SHORT: model._time,
-        X: model._positions[X],
-        Y: model._positions[Y],
-        Z: model._positions[Z]
+        TIME_SHORT: model.time,
+        X: model.positions[X],
+        Y: model.positions[Y],
+        Z: model.positions[Z]
     }
 
     # convert to pandas DataFrame
@@ -190,14 +110,12 @@ def linearRegression(sourceModel):
         linearRegressionPredict(df, coord)
 
     # copy the data back to the model
-    model._positions[X] = df[X]
-    model._positions[Y] = df[Y]
-    model._positions[Z] = df[Z]
+    model.rlPositions[X] = df[X]
+    model.rlPositions[Y] = df[Y]
+    model.rlPositions[Z] = df[Z]
 
     # plot the results
-    plotData("Regression Line", sourceModel, model)
-
-    return model
+    plotData("Regression Line", sourceModel.positions, model.rlPositions)
 
 # Function to compute the Kalman filter to estimate missing values
 def kalmanFilter(sourceModel):
@@ -206,10 +124,10 @@ def kalmanFilter(sourceModel):
 
     # input data
     data = {
-        TIME_SHORT: model._time,
-        X: model._positions[X],
-        Y: model._positions[Y],
-        Z: model._positions[Z]
+        TIME_SHORT: model.time,
+        X: model.positions[X],
+        Y: model.positions[Y],
+        Z: model.positions[Z]
     }
 
     # convert to pandas DataFrame
@@ -261,26 +179,24 @@ def kalmanFilter(sourceModel):
     df_estimated[[X, Y, Z]] = estimatedCoords
 
     # copy the data back to the model
-    model._positions[X] = df_estimated[X]
-    model._positions[Y] = df_estimated[Y]
-    model._positions[Z] = df_estimated[Z]
+    model.kfPositions[X] = df_estimated[X]
+    model.kfPositions[Y] = df_estimated[Y]
+    model.kfPositions[Z] = df_estimated[Z]
 
     # plot the results
-    plotData("Kalman Filter", sourceModel, model)
+    plotData("Kalman Filter", sourceModel.positions, model.kfPositions)
 
-    return model
-
-def plotData(operation, first, second=None):
+def plotData(operation, firstDataPoints, secondDataPoints=None):
 
     # extract data
-    X1 = np.array(first._positions[X])
-    Y1 = np.array(first._positions[Y])
-    Z1 = np.array(first._positions[Z])
+    X1 = np.array(firstDataPoints[X])
+    Y1 = np.array(firstDataPoints[Y])
+    Z1 = np.array(firstDataPoints[Z])
 
-    if second is not None:
-        X2 = np.array(second._positions[X])
-        Y2 = np.array(second._positions[Y])
-        Z2 = np.array(second._positions[Z])
+    if secondDataPoints is not None:
+        X2 = np.array(secondDataPoints[X])
+        Y2 = np.array(secondDataPoints[Y])
+        Z2 = np.array(secondDataPoints[Z])
 
     # plot the results in 3D on two separate charts
     fig = plt.figure(figsize=(14, 6))
@@ -293,7 +209,7 @@ def plotData(operation, first, second=None):
     ax1.set_zlabel(Z)
     ax1.set_title('Original Data')
 
-    if second is not None:
+    if secondDataPoints is not None:
         # plot for new data
         ax2 = fig.add_subplot(1, 2, 2, projection='3d')
         ax2.scatter(X2, Y2, Z2, c='b', label=f'{operation} Data')
