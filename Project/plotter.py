@@ -1,5 +1,6 @@
 import open3d as o3d
 import imageio
+import cv2
 
 from global_constants import *
 
@@ -54,8 +55,9 @@ def getIndex(start, dictionary):
   return -1 
 
 
-def visualizeAndSaveSequence(visualizer, markersList, fName):
-  images=[]
+def visualizeSequence(visualizer, markersList, fName):
+  
+  images = []
   # Iteration over all the point clouds
   for marker in markersList:
     visualizer.clear_geometries() #clears any existing geometries from the visualizer
@@ -65,16 +67,12 @@ def visualizeAndSaveSequence(visualizer, markersList, fName):
     visualizer.update_geometry(pcd) 
     visualizer.poll_events() 
     visualizer.update_renderer()
-    
-  # images = np.array(images)
-  # for img in images:
-  #   img = (img[..., :3] * 255).astype(np.uint8) #convert to rgb
-  # if os.path.exists(SAVE_VIDEO_PATH+fName):
-  #   return
-  # imageio.mimsave(SAVE_VIDEO_PATH+fName, images, fps=FPS) #save the images as a video
+    img = visualizer.capture_screen_float_buffer(True) #captures the screen image
+    images.append(img) #appends the image to the images list
 
   visualizer.destroy_window()
-
+  images = np.array(images)
+  return images
 
 def setVisualizer(pointSize):
 
@@ -86,6 +84,15 @@ def setVisualizer(pointSize):
 
   return visualizer
 
+
+def saveVideo(images, fName):
+  height, width, _ = images[0].shape
+  video = cv2.VideoWriter(SAVE_VIDEO_PATH+fName, cv2.VideoWriter_fourcc(*'MP4V'), FPS, (width, height))
+  for img in images:
+    video.write(img)
+  video.release()
+  
+  
 
 #plots the rigid body markers
 def markerRigidBodyPlot(data, fName):
@@ -105,8 +112,28 @@ def markerRigidBodyPlot(data, fName):
 
     # Creation of the visualizer object (the visualization window)
     visualizer = setVisualizer(10.0)
+    images = visualizeSequence(visualizer, allMarkers, fName)
+    #save the video
+    while True:
+      print("Do you want to save the video?")
+      print("1. YES")
+      print("0. NO. Exit the program")
 
-    visualizeAndSaveSequence(visualizer, allMarkers, fName)
+      option = input("Enter your choice: ")
+      if option == '1':
+        print("Saving video...")
+        saveVideo(images)
+        print("Video saved")
+        return True
+
+      elif option == '0':
+        print("Not saving video. Exiting the program")
+        break # Exit the loop and end the program
+      
+      else:
+        print("Invalid input, try again.")
+      
+    
 
 
 def skeletonMarkerPlot(data, fName):
@@ -122,8 +149,25 @@ def skeletonMarkerPlot(data, fName):
     # Creation of the visualizer window
     visualizer = setVisualizer(8.0)
 
-    visualizeAndSaveSequence(visualizer, bonesMarkerList, fName)
+    images = visualizeSequence(visualizer, bonesMarkerList, fName)
+    while True:
+      print("Do you want to save the video?")
+      print("1. YES")
+      print("0. NO. Exit the program")
 
+      option = input("Enter your choice: ")
+      if option == '1':
+        print("Saving video...")
+        saveVideo(images)
+        print("Video saved")
+        return True
+
+      elif option == '0':
+        print("Not saving video. Exiting the program")
+        break # Exit the loop and end the program
+      
+      else:
+        print("Invalid input, try again.")
 
 def skeletonJointsPlot(data, fName):
 
