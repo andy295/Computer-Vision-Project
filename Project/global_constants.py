@@ -1,5 +1,6 @@
 import os
 import sys
+import cv2
 import copy
 import platform
 import numpy as np

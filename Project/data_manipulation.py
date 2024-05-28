@@ -1,4 +1,5 @@
-import cv2
+import string
+import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -115,6 +116,9 @@ def linearRegression(sourceModel):
     model.rlPositions[X] = df[X].to_list()
     model.rlPositions[Y] = df[Y].to_list()
     model.rlPositions[Z] = df[Z].to_list()
+    model.rlPositions[X] = df[X].to_list()
+    model.rlPositions[Y] = df[Y].to_list()
+    model.rlPositions[Z] = df[Z].to_list()
 
     # # plot the results
     # plotData("Regression Line", sourceModel.positions, model.rlPositions)
@@ -187,6 +191,9 @@ def kalmanFilter(sourceModel):
     df_estimated[[X, Y, Z]] = estimatedCoords
 
     # copy the data back to the model
+    model.kfPositions[X] = df_estimated[X].to_list()
+    model.kfPositions[Y] = df_estimated[Y].to_list()
+    model.kfPositions[Z] = df_estimated[Z].to_list()
     model.kfPositions[X] = df_estimated[X].to_list()
     model.kfPositions[Y] = df_estimated[Y].to_list()
     model.kfPositions[Z] = df_estimated[Z].to_list()
