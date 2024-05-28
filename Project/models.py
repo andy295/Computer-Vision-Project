@@ -105,7 +105,7 @@ class CSVModel:
 
     @property
     def splPositions(self):
-        return self._splpositions
+        return self._splPositions
 
     @splPositions.setter
     def splPositions(self, s):

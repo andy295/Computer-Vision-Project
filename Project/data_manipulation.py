@@ -1,7 +1,8 @@
 import cv2
-import string
-import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from scipy.interpolate import splprep, splev
 from sklearn.linear_model import LinearRegression
 
 from global_constants import *
@@ -38,6 +39,7 @@ def filterData(filePath, data):
                     print(f'Filtering data for model: {model.getName()}')
                     linearRegression(model)
                     kalmanFilter(model)
+                    splineInterpolation(model)
                     print(f'Data correctly filtered\n')
 
                 break
@@ -110,12 +112,18 @@ def linearRegression(sourceModel):
         linearRegressionPredict(df, coord)
 
     # copy the data back to the model
-    model.rlPositions[X] = df[X]
-    model.rlPositions[Y] = df[Y]
-    model.rlPositions[Z] = df[Z]
+    model.rlPositions[X] = df[X].to_list()
+    model.rlPositions[Y] = df[Y].to_list()
+    model.rlPositions[Z] = df[Z].to_list()
 
-    # plot the results
-    plotData("Regression Line", sourceModel.positions, model.rlPositions)
+    # # plot the results
+    # plotData("Regression Line", sourceModel.positions, model.rlPositions)
+    
+    # copy the data back to the original model
+    sourceModel.rlPositions[X] = df[X].to_list()
+    sourceModel.rlPositions[Y] = df[Y].to_list()
+    sourceModel.rlPositions[Z] = df[Z].to_list()
+    
 
 # Function to compute the Kalman filter to estimate missing values
 def kalmanFilter(sourceModel):
@@ -179,12 +187,64 @@ def kalmanFilter(sourceModel):
     df_estimated[[X, Y, Z]] = estimatedCoords
 
     # copy the data back to the model
-    model.kfPositions[X] = df_estimated[X]
-    model.kfPositions[Y] = df_estimated[Y]
-    model.kfPositions[Z] = df_estimated[Z]
+    model.kfPositions[X] = df_estimated[X].to_list()
+    model.kfPositions[Y] = df_estimated[Y].to_list()
+    model.kfPositions[Z] = df_estimated[Z].to_list()
 
     # plot the results
-    plotData("Kalman Filter", sourceModel.positions, model.kfPositions)
+    #plotData("Kalman Filter", sourceModel.positions, model.kfPositions)
+    
+    # copy the data back to the original model
+    sourceModel.kfPositions[X] = df_estimated[X].to_list()
+    sourceModel.kfPositions[Y] = df_estimated[Y].to_list()
+    sourceModel.kfPositions[Z] = df_estimated[Z].to_list()
+
+
+def splineInterpolation(sourceModel):
+
+    pointList = np.array([sourceModel.positions[X], sourceModel.positions[Y], sourceModel.positions[Z]]).T
+    #remove missing points
+    validPoints = pointList[~np.all(pointList == (0, 0, 0), axis=1)]
+    
+    # Function to create a spline and interpolate points
+    def spline(x, n, k=2):
+        tck, u = splprep(x.T, s=0, k=k)
+        u_new = np.linspace(0, 1, n)
+        new_points = splev(u_new, tck)
+        return np.column_stack(new_points)
+
+    # Number of points we compute interpolation for
+    num_interpolated_points = round(len(pointList))
+    # Interpolation of valid points with the spline function
+    interpolated_points = spline(validPoints, num_interpolated_points, k=3)
+    
+    # Function to estimate missing points
+    def estimate_missing_points(original_points, interpolated_points):
+        estimated_points = original_points.copy()
+        interpolated_idx = 0
+        
+        for point in original_points:
+            if np.all(point == (0, 0, 0)):
+                estimated_points[interpolated_idx] = interpolated_points[round(interpolated_idx)]
+            interpolated_idx += 1
+        #return the complete list of points filled with estimated points
+        return estimated_points
+    
+    estimatedPoints = estimate_missing_points(pointList, interpolated_points)
+    
+    xList, yList, zList = zip(*estimatedPoints)
+    # copy the data back to the original model
+    sourceModel.splPositions[X] = xList
+    sourceModel.splPositions[Y] = yList
+    sourceModel.splPositions[Z] = zList
+    
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+    # ax.plot(interpolated_points[:, 0], interpolated_points[:, 1], interpolated_points[:, 2], 'b', label='Spline interpolata')
+    # # plot the results
+    # plotData("Spline interpolation", sourceModel.positions, sourceModel.splPositions)
+
+
 
 def plotData(operation, firstDataPoints, secondDataPoints=None):
 

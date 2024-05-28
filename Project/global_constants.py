@@ -56,13 +56,20 @@ SRC_FILE = RIGID_BODY + EXTENSIONS[Extension.csv]
 # SRC_FILE = ANIMATION + EXTENSIONS[Extension.bvh]
 # SRC_FILE = MARKER + EXTENSIONS[Extension.c3d]
 
+FPS = 30
+
+#TYPE OF FILTERING
+KALMAN_FILTER = 'kfPositions'
+LINEAR_REGRESSION = 'rlPositions'
+SPLINE_INTERPOLATION = 'splPositions'
+
 # PATHS
 if platform.system() == 'Linux':
     SRC_PATH = 'Data/60fps'
 elif platform.system() == 'Windows':
     SRC_PATH = r'C:\Users\utente\Documents\VitaaTrento\Anno1Semestre2\ComputerVision\progettoCV\Computer-Vision-Project\Project\Data'
     SAVE_VIDEO_PATH = r'C:\Users\utente\Documents\VitaaTrento\Anno1Semestre2\ComputerVision\progettoCV\Computer-Vision-Project\Project\Video\\'
-    FPS = 30
+    SAVE_IMAGES_PATH = r'C:\Users\utente\Documents\VitaaTrento\Anno1Semestre2\ComputerVision\progettoCV\Computer-Vision-Project\Project\Video\images\\'
 else:
     print('Error: Unsupported OS')
     sys.exit()
