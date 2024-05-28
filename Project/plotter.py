@@ -1,6 +1,5 @@
 import open3d as o3d
 import imageio
-import cv2
 
 from global_constants import *
 
