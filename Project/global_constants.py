@@ -132,6 +132,7 @@ SPACE_REPLACEMENT = '_'
 
 # MODALITIES
 NONE = 'n'
+PLOT_CHART = False
 
 # I/O
 READ = 'r'

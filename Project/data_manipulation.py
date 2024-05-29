@@ -1,8 +1,5 @@
-import string
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
 from scipy.interpolate import splprep, splev
 from sklearn.linear_model import LinearRegression
 
@@ -95,14 +92,12 @@ def linearRegressionPredict(df, column):
 # Function to compute the linear regression to estimate missing values
 def linearRegression(sourceModel):
 
-    model = sourceModel.deepcopy()
-
     # input data
     data = {
-        TIME_SHORT: model.time,
-        X: model.positions[X],
-        Y: model.positions[Y],
-        Z: model.positions[Z]
+        TIME_SHORT: sourceModel.time,
+        X: sourceModel.positions[X],
+        Y: sourceModel.positions[Y],
+        Z: sourceModel.positions[Z]
     }
 
     # convert to pandas DataFrame
@@ -112,41 +107,17 @@ def linearRegression(sourceModel):
     for coord in [X, Y, Z]:
         linearRegressionPredict(df, coord)
 
-    # copy the data back to the model
-    model.rlPositions[X] = df[X].to_list()
-    model.rlPositions[Y] = df[Y].to_list()
-    model.rlPositions[Z] = df[Z].to_list()
-    model.rlPositions[X] = df[X].to_list()
-    model.rlPositions[Y] = df[Y].to_list()
-    model.rlPositions[Z] = df[Z].to_list()
-
-    # # plot the results
-    # plotData("Regression Line", sourceModel.positions, model.rlPositions)
-    
     # copy the data back to the original model
     sourceModel.rlPositions[X] = df[X].to_list()
     sourceModel.rlPositions[Y] = df[Y].to_list()
     sourceModel.rlPositions[Z] = df[Z].to_list()
-    
 
-# Function to compute the Kalman filter to estimate missing values
-def kalmanFilter(sourceModel):
-    
-    model = sourceModel.deepcopy()
+    if PLOT_CHART:
+        # plot the results
+        plotData("Regression Line", sourceModel.positions, sourceModel.rlPositions)
 
-    # input data
-    data = {
-        TIME_SHORT: model.time,
-        X: model.positions[X],
-        Y: model.positions[Y],
-        Z: model.positions[Z]
-    }
-
-    # convert to pandas DataFrame
-    df = pd.DataFrame(data)
-
+def initKalmanFilter(dt=5, vel=1, acc=1, processNoiseStD=0.1, measurementNoiseStD=0.001):
     # time step, we are assuming it constant for simplicity
-    dt = df[TIME_SHORT].diff().mean()
     dtTo2 = 0.5 * dt**2
 
     # instantiate and initialize the Kalman filter
@@ -157,21 +128,39 @@ def kalmanFilter(sourceModel):
         [0, 0, 1, 0, 0, 0, 0, 0, 0]], np.float32)
 
     kalman.transitionMatrix = np.array([
-        [1, 0, 0, dt, 0, 0, dtTo2, 0, 0],
-        [0, 1, 0, 0, dt, 0, 0, dtTo2, 0],
-        [0, 0, 1, 0, 0, dt, 0, 0, dtTo2],
-        [0, 0, 0, 1, 0, 0, dt, 0, 0],
-        [0, 0, 0, 0, 1, 0, 0, dt, 0],
-        [0, 0, 0, 0, 0, 1, 0, 0, dt],
+        [1, 0, 0, vel*dt, 0, 0, acc*dtTo2, 0, 0],
+        [0, 1, 0, 0, vel*dt, 0, 0, acc*dtTo2, 0],
+        [0, 0, 1, 0, 0, vel*dt, 0, 0, acc*dtTo2],
+        [0, 0, 0, 1, 0, 0, vel*dt, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, vel*dt, 0],
+        [0, 0, 0, 0, 0, 1, 0, 0, vel*dt],
         [0, 0, 0, 0, 0, 0, 1, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 1, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 1]], np.float32)
 
-    processNoiseStD = 0.1
     kalman.processNoiseCov = np.eye(9, dtype=np.float32) * processNoiseStD
 
-    measurementNoiseStD = 0.001
     kalman.measurementNoiseCov = np.eye(3, dtype=np.float32) * measurementNoiseStD
+
+    return kalman
+
+# Function to compute the Kalman filter to estimate missing values
+def kalmanFilter(sourceModel):
+
+    # input data
+    data = {
+        TIME_SHORT: sourceModel.time,
+        X: sourceModel.positions[X],
+        Y: sourceModel.positions[Y],
+        Z: sourceModel.positions[Z]
+    }
+
+    # convert to pandas DataFrame
+    df = pd.DataFrame(data)
+
+    # time step, we are assuming it constant for simplicity
+    dt = df[TIME_SHORT].diff().mean()
+    kalman = initKalmanFilter(dt)
 
     # prepare storage for estimated results
     estimatedCoords = np.zeros((len(df), 3), dtype=np.float32)
@@ -190,29 +179,21 @@ def kalmanFilter(sourceModel):
     df_estimated = df.copy()
     df_estimated[[X, Y, Z]] = estimatedCoords
 
-    # copy the data back to the model
-    model.kfPositions[X] = df_estimated[X].to_list()
-    model.kfPositions[Y] = df_estimated[Y].to_list()
-    model.kfPositions[Z] = df_estimated[Z].to_list()
-    model.kfPositions[X] = df_estimated[X].to_list()
-    model.kfPositions[Y] = df_estimated[Y].to_list()
-    model.kfPositions[Z] = df_estimated[Z].to_list()
-
-    # plot the results
-    #plotData("Kalman Filter", sourceModel.positions, model.kfPositions)
-    
     # copy the data back to the original model
     sourceModel.kfPositions[X] = df_estimated[X].to_list()
     sourceModel.kfPositions[Y] = df_estimated[Y].to_list()
     sourceModel.kfPositions[Z] = df_estimated[Z].to_list()
 
+    if PLOT_CHART:
+        # plot the results
+        plotData("Kalman Filter", sourceModel.positions, sourceModel.kfPositions)
 
 def splineInterpolation(sourceModel):
 
     pointList = np.array([sourceModel.positions[X], sourceModel.positions[Y], sourceModel.positions[Z]]).T
     #remove missing points
     validPoints = pointList[~np.all(pointList == (0, 0, 0), axis=1)]
-    
+
     # Function to create a spline and interpolate points
     def spline(x, n, k=2):
         tck, u = splprep(x.T, s=0, k=k)
@@ -224,34 +205,34 @@ def splineInterpolation(sourceModel):
     num_interpolated_points = round(len(pointList))
     # Interpolation of valid points with the spline function
     interpolated_points = spline(validPoints, num_interpolated_points, k=3)
-    
+
     # Function to estimate missing points
     def estimate_missing_points(original_points, interpolated_points):
         estimated_points = original_points.copy()
         interpolated_idx = 0
-        
+
         for point in original_points:
             if np.all(point == (0, 0, 0)):
                 estimated_points[interpolated_idx] = interpolated_points[round(interpolated_idx)]
             interpolated_idx += 1
         #return the complete list of points filled with estimated points
         return estimated_points
-    
+
     estimatedPoints = estimate_missing_points(pointList, interpolated_points)
-    
+
     xList, yList, zList = zip(*estimatedPoints)
     # copy the data back to the original model
     sourceModel.splPositions[X] = xList
     sourceModel.splPositions[Y] = yList
     sourceModel.splPositions[Z] = zList
-    
+
+    if PLOT_CHART:   
+        # plot the results
+        plotData("Spline interpolation", sourceModel.positions, sourceModel.splPositions)
+
     # fig = plt.figure()
     # ax = fig.add_subplot(111, projection='3d')
     # ax.plot(interpolated_points[:, 0], interpolated_points[:, 1], interpolated_points[:, 2], 'b', label='Spline interpolata')
-    # # plot the results
-    # plotData("Spline interpolation", sourceModel.positions, sourceModel.splPositions)
-
-
 
 def plotData(operation, firstDataPoints, secondDataPoints=None):
 
