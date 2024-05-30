@@ -148,7 +148,7 @@ def setVisualizer(pointSize):
   # Creation of the visualizer window
   visualizer = o3d.visualization.Visualizer()
   visualizer.create_window(window_name='Open3D', width=720, height=480)
-  visualizer.set_full_screen(True)
+  # visualizer.set_full_screen(True)
   visualizer.get_render_option().background_color = np.asarray([0, 0, 0]) #black background
   visualizer.get_render_option().point_size = pointSize
 
@@ -199,6 +199,7 @@ def clear_directory(directory, value):
 def markerRigidBodyPlot(data, fName, typeOfFiltering):
   
   allMarkers = []
+  # plot the original points
   if typeOfFiltering == None:
     # transform from dictionary[(X:x1,x2...), (Y:y1,y2...), (Z:z1,z2...)] to list of tuples (list[x, y, z])
     for model in data:
