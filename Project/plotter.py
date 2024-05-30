@@ -1,11 +1,10 @@
 import open3d as o3d
-import cv2
 import pyautogui
-import os
 import shutil
+
 from global_constants import *
 
-#data is a list of models. A model is a group of columns (i.e. the model 'marker' or 'bone')
+# data is a list of models. A model is a group of columns (i.e. the model 'marker' or 'bone')
 def plotData(filePath=None, data=None):
     if data is None or filePath is None:
       print(f'Error: Invalid data or file path\n')
@@ -13,7 +12,7 @@ def plotData(filePath=None, data=None):
     fName = os.path.basename(filePath)
     fName, fExt = os.path.splitext(fName)
     if fExt == EXTENSIONS[Extension.csv]:
-    
+
       if fName == RIGID_BODY:
         while True:
           print(f'Please select the type of rigid body visualization')
@@ -22,34 +21,33 @@ def plotData(filePath=None, data=None):
           print(f'3. Linear regression estimated rigid body points')
           print(f'4. Spline interpolation estimated rigid body points')
           print(f'0. Exit the program')
-          
+
           option = input(f'Enter your choice: ')
           if option == '1':
             print(f'Original rigid body points')
-            markerRigidBodyPlot(data, fName, None)
-            return True
-          
+            # markerRigidBodyPlot(data, fName, None)
+
           elif option == '2':
             print(f'Kalman filtered rigid body points')
-            markerRigidBodyPlot(data, fName, KALMAN_FILTER)
-            return True
-          
+            # markerRigidBodyPlot(data, fName, KALMAN_FILTER)
+
           elif option == '3':
             print(f'Linear regression estimated rigid body points')
-            markerRigidBodyPlot(data, fName, LINEAR_REGRESSION)
-            return True
-          
+            # markerRigidBodyPlot(data, fName, LINEAR_REGRESSION)
+
           elif option == '4':
             print(f'Spline interpolation estimated rigid body points')
-            markerRigidBodyPlot(data, fName, SPLINE_INTERPOLATION)
-          
+            # markerRigidBodyPlot(data, fName, SPLINE_INTERPOLATION)
+
           elif option == '0':
             # exit the loop and end the program
             break
-          
+
           else:
               print(f'Invalid input, try again.')
-        markerRigidBodyPlot(data, fName)
+
+          print()
+
         return True
 
       elif fName == SKELETON:
@@ -63,12 +61,12 @@ def plotData(filePath=None, data=None):
           option = input(f'Enter your choice: ')
           if option == '1':
             print(f'Skeleton with markers')
-            skeletonMarkerPlot(data, fName)
+            # skeletonMarkerPlot(data, fName)
             return True
 
           elif option == '2':
             print(f'Skeleton joints')
-            skeletonJointsPlot(data, fName)
+            # skeletonJointsPlot(data, fName)
             return True
 
           elif option == '0':
@@ -87,11 +85,11 @@ def getIndex(start, dictionary):
     if start in key:
       return list(dictionary.keys()).index(key)
 
-  return -1 
+  return -1
 
 
 def visualizeSequence(visualizer, markersList, fName, SAVE):
-  
+
   if SAVE:
     # # Get screen size
     # screen_size = (pyautogui.size().width, pyautogui.size().height)
@@ -108,8 +106,8 @@ def visualizeSequence(visualizer, markersList, fName, SAVE):
       pcd = o3d.geometry.PointCloud()
       pcd.points = o3d.utility.Vector3dVector(marker) #sets the points of the pcd from the points in the marker tuple
       visualizer.add_geometry(pcd) #adds the pcd to the visualizer for rendering
-      visualizer.update_geometry(pcd) 
-      visualizer.poll_events() 
+      visualizer.update_geometry(pcd)
+      visualizer.poll_events()
       visualizer.update_renderer()
       # Capture screenshot
       img = pyautogui.screenshot()
@@ -123,7 +121,7 @@ def visualizeSequence(visualizer, markersList, fName, SAVE):
       # Wait for the user to press 'q' key to stop the recording
       if cv2.waitKey(1) == ord('q'):
         break
-    
+
     # Release the VideoWriter object
     # out.release()
     # cv2.destroyAllWindows()
@@ -136,11 +134,11 @@ def visualizeSequence(visualizer, markersList, fName, SAVE):
       pcd = o3d.geometry.PointCloud()
       pcd.points = o3d.utility.Vector3dVector(marker) #sets the points of the pcd from the points in the marker tuple
       visualizer.add_geometry(pcd) #adds the pcd to the visualizer for rendering
-      visualizer.update_geometry(pcd) 
-      visualizer.poll_events() 
+      visualizer.update_geometry(pcd)
+      visualizer.poll_events()
       visualizer.update_renderer()
 
-  visualizer.destroy_window() 
+  visualizer.destroy_window()
 
 
 def setVisualizer(pointSize):
@@ -156,7 +154,7 @@ def setVisualizer(pointSize):
 
 
 def recordAndSave(path, fName):
-  
+
   # Get screen size
   screen_size = (pyautogui.size().width, pyautogui.size().height)
   # Define the codec using VideoWriter_fourcc() and create a VideoWriter object
@@ -177,7 +175,7 @@ def recordAndSave(path, fName):
     # Wait for the user to press 'q' key to stop the recording
     if cv2.waitKey(1) == ord('q'):
         break
-      
+
   # Release the VideoWriter object
   out.release()
   cv2.destroyAllWindows()
@@ -197,7 +195,7 @@ def clear_directory(directory, value):
 
 #plots the rigid body markers
 def markerRigidBodyPlot(data, fName, typeOfFiltering):
-  
+
   allMarkers = []
   # plot the original points
   if typeOfFiltering == None:
@@ -205,7 +203,7 @@ def markerRigidBodyPlot(data, fName, typeOfFiltering):
     for model in data:
       points = list(zip(model._positions[X], model._positions[Y], model._positions[Z]))
       allMarkers.append(points)
-      
+
   else: #takes the filtered points based on the filter requested
     # transform from dictionary[(X:x1,x2...), (Y:y1,y2...), (Z:z1,z2...)] to list of tuples (list[x, y, z])
     for model in data:
@@ -222,7 +220,7 @@ def markerRigidBodyPlot(data, fName, typeOfFiltering):
   #   print("Do you want to save the video?")
   #   print("1. YES")
   #   print("0. NO. Exit the program")
-      
+
   #   option = input("Enter your choice: ")
   #   if option == '1':
   #     print("Saving and showing video...")
@@ -237,7 +235,7 @@ def markerRigidBodyPlot(data, fName, typeOfFiltering):
   #     visualizeSequence(visualizer, allMarkers, fName, SAVE=False)
   #     print("Video not saved")
   #     break # Exit the loop and end the program
-      
+
   #   else:
   #     print("Invalid input, try again.")
 
@@ -254,7 +252,7 @@ def skeletonMarkerPlot(data, fName):
 
     # Creation of the visualizer window
     visualizer = setVisualizer(8.0)
-    
+
     while True:
       print("Do you want to save the video?")
       print("1. YES")
@@ -272,7 +270,7 @@ def skeletonMarkerPlot(data, fName):
         visualizeSequence(visualizer, bonesMarkerList, fName, False)
         print("Video not saved")
         break # Exit the loop and end the program
-      
+
       else:
         print("Invalid input, try again.")
 
@@ -296,7 +294,7 @@ def skeletonJointsPlot(data, fName):
     #'RHand' : ['RFArm'], #we know  hand is not connected to anything new
     'LThigh' : ['LShin'],
     'LShin' : ['LFoot'],
-    'LFoot' : ['LToe'], 
+    'LFoot' : ['LToe'],
     #'LToe' : ['LFoot'], #we know  toe is not connected to anything new
     'RThigh' : ['RShin'],
     'RShin' : ['RFoot'],
@@ -317,7 +315,7 @@ def skeletonJointsPlot(data, fName):
 
   vertices = []
   #we adapt a list of tuples [xyz, xyz, xyz, xyz] to Open3D
-  for skeletonPoints in lists_of_points: 
+  for skeletonPoints in lists_of_points:
     vertices.append(np.array(skeletonPoints))
 
   # Create a Visualizer object
@@ -328,7 +326,7 @@ def skeletonJointsPlot(data, fName):
   for start, ends in jointsGraph.items():
       start_idx = getIndex(start, bonesPosDict)
       for end in ends:
-          end_idx = getIndex(end, bonesPosDict)    
+          end_idx = getIndex(end, bonesPosDict)
           lines.append([start_idx, end_idx])
 
   line_set = o3d.geometry.LineSet()
