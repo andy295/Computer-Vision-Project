@@ -1,6 +1,7 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
-from scipy.interpolate import splprep, splev
+from scipy.interpolate import splprep, splev, CubicSpline
 from sklearn.linear_model import LinearRegression
 
 from global_constants import *
@@ -16,51 +17,13 @@ def filterData(filePath, data):
 
     # only data extracted from rigidbody.csv file can be filtered
     if fExt == EXTENSIONS[Extension.csv] and fName == RIGID_BODY:
+        splineInterpolation(data)
+        for model in data:
+            print(f'Filtering data for model: {model.getName()}')
+            linearRegression(model)
+            kalmanFilter(model)
+            print(f'Data correctly filtered\n')
 
-        option = 1
-        while True:
-            text = f'Models that can be filtered:\n'
-            text += f'0. Exit\n'
-            text += f'1. All\n'
-            for idx, model in enumerate(data):
-                text += f'{idx+2}. {model.getName()}\n'
-
-            text += f'Please select the model to filter:'
-            option = getIntegerInput(text)        
-            if option == 0:
-                # exit the loop and end the program
-                break
-
-            elif option == 1:
-
-                for model in data:
-                    print(f'Filtering data for model: {model.getName()}')
-                    linearRegression(model)
-                    kalmanFilter(model)
-                    splineInterpolation(model)
-                    print(f'Data correctly filtered\n')
-
-                break
-
-            elif option > 1 and option < len(data) + 2:
-
-                for idx, model in enumerate(data):
-                    if option == idx + 2:
-                        print(f'Filtering data for model: {model.getName()}')
-                        linearRegression(model)
-                        kalmanFilter(model)
-                        print(f'Data correctly filtered\n')
-
-                exit = f'Would you like to filter another model?\n'
-                exit += f'0 to No\n'
-                exit += f'Any integer to Yes\n'
-                exit += f'Make your choice: '
-                exit = getIntegerInput(exit)
-                if exit == 0:
-                    # exit the loop and end the program
-                    break
-            else:
-                print(f'Invalid input, try again.')
 
 # Function to prepare data by separating into training and test sets
 def linearRegressionPrepareData(df, column):
@@ -188,51 +151,50 @@ def kalmanFilter(sourceModel):
         # plot the results
         plotData("Kalman Filter", sourceModel.positions, sourceModel.kfPositions)
 
-def splineInterpolation(sourceModel):
+# data is a list of model, i.e. a list of markers
+def splineInterpolation(data):
 
-    pointList = np.array([sourceModel.positions[X], sourceModel.positions[Y], sourceModel.positions[Z]]).T
-    #remove missing points
-    validPoints = pointList[~np.all(pointList == (0, 0, 0), axis=1)]
+    markerList = []
+    # obtaining a list of list of positions in time
+    for model in data:
+        tempList = list(zip(model.positions[X], model.positions[Y], model.positions[Z]))
+        markerList.append(tempList)
+    markerList = np.array(markerList)
+    
+    # Number of markers
+    num_markers, _, _ = markerList.shape
 
-    # Function to create a spline and interpolate points
-    def spline(x, n, k=2):
-        tck, u = splprep(x.T, s=0, k=k)
-        u_new = np.linspace(0, 1, n)
-        new_points = splev(u_new, tck)
-        return np.column_stack(new_points)
-
-    # Number of points we compute interpolation for
-    num_interpolated_points = round(len(pointList))
-    # Interpolation of valid points with the spline function
-    interpolated_points = spline(validPoints, num_interpolated_points, k=3)
-
-    # Function to estimate missing points
-    def estimate_missing_points(original_points, interpolated_points):
-        estimated_points = original_points.copy()
-        interpolated_idx = 0
-
-        for point in original_points:
-            if np.all(point == (0, 0, 0)):
-                estimated_points[interpolated_idx] = interpolated_points[round(interpolated_idx)]
-            interpolated_idx += 1
-        #return the complete list of points filled with estimated points
-        return estimated_points
-
-    estimatedPoints = estimate_missing_points(pointList, interpolated_points)
-
-    xList, yList, zList = zip(*estimatedPoints)
-    # copy the data back to the original model
-    sourceModel.splPositions[X] = xList
-    sourceModel.splPositions[Y] = yList
-    sourceModel.splPositions[Z] = zList
-
+    # Identify time entries with missing values
+    missing_indices = np.where((markerList == (0, 0, 0)).all(axis=0).all(axis=1))[0]
+    available_indices = np.where(~(markerList == (0, 0, 0)).all(axis=0).all(axis=1))[0]
+    
+    # Function to interpolate and fill missing values for each marker
+    def interpolate_and_fill(markerList, missing_indices, available_indices):
+        filledMarkerList = np.copy(markerList)
+        t = available_indices  # Time points for available data
+        
+        for marker in range(num_markers):
+            for i in range(3):  # For x, y, z
+                values = markerList[marker, available_indices, i]
+                cs = CubicSpline(t, values)
+                filled_values = cs(missing_indices)
+                filledMarkerList[marker, missing_indices, i] = filled_values
+                
+        return filledMarkerList
+    
+    # Fill the missing data
+    filledMarkerList = interpolate_and_fill(markerList, missing_indices, available_indices)
+    for i, model in enumerate(data):
+            xList, yList, zList = zip(*filledMarkerList[i])
+            model.splPositions[X] = xList
+            model.splPositions[Y] = yList
+            model.splPositions[Z] = zList
+            
     if PLOT_CHART:   
-        # plot the results
-        plotData("Spline interpolation", sourceModel.positions, sourceModel.splPositions)
+        # plot the results for each marker
+        for i, model in enumerate(data):
+            plotData("Spline interpolation for marker %d" % i, model.positions, model.splPositions)
 
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111, projection='3d')
-    # ax.plot(interpolated_points[:, 0], interpolated_points[:, 1], interpolated_points[:, 2], 'b', label='Spline interpolata')
 
 def plotData(operation, firstDataPoints, secondDataPoints=None):
 

@@ -25,19 +25,19 @@ def plotData(filePath=None, data=None):
           option = input(f'Enter your choice: ')
           if option == '1':
             print(f'Original rigid body points')
-            # markerRigidBodyPlot(data, fName, None)
+            markerRigidBodyPlot(data, fName, None)
 
           elif option == '2':
             print(f'Kalman filtered rigid body points')
-            # markerRigidBodyPlot(data, fName, KALMAN_FILTER)
+            markerRigidBodyPlot(data, fName, KALMAN_FILTER)
 
           elif option == '3':
             print(f'Linear regression estimated rigid body points')
-            # markerRigidBodyPlot(data, fName, LINEAR_REGRESSION)
+            markerRigidBodyPlot(data, fName, LINEAR_REGRESSION)
 
           elif option == '4':
             print(f'Spline interpolation estimated rigid body points')
-            # markerRigidBodyPlot(data, fName, SPLINE_INTERPOLATION)
+            markerRigidBodyPlot(data, fName, SPLINE_INTERPOLATION)
 
           elif option == '0':
             # exit the loop and end the program
@@ -61,12 +61,12 @@ def plotData(filePath=None, data=None):
           option = input(f'Enter your choice: ')
           if option == '1':
             print(f'Skeleton with markers')
-            # skeletonMarkerPlot(data, fName)
+            skeletonMarkerPlot(data, fName)
             return True
 
           elif option == '2':
             print(f'Skeleton joints')
-            # skeletonJointsPlot(data, fName)
+            skeletonJointsPlot(data, fName)
             return True
 
           elif option == '0':

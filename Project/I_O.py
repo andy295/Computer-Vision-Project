@@ -146,8 +146,6 @@ def readCSV(filePath):
 
       if data is not None:
         data = extractDataCSV(data)
-        # print('tipo: ', type(data))
-        # print(len(data))
 
   except Exception as e:
     print(f'Error: Impossible to read CSV file - {e}\n')
@@ -293,6 +291,7 @@ def extractDataCSV(data):
             if outerKey != HEADER:
                 middleDict[TIME] = {TIME_SHORT: times}
 
+        # printing the structure
         for outerKey in sorted(dataDict.keys()):
             print(outerKey + ':')
             middleDict = dataDict[outerKey]
