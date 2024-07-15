@@ -1,12 +1,98 @@
 from experiment import *
 
+def choice(message, lastLevel, params):
+
+  str = ''
+  option = '-2'
+
+  while option not in ['0']:
+    print(message)
+
+    for i in range(len(params)):
+      print(f'{i+1}. {params[i]}')
+    print(f'{len(params)+1}. Return to the previous menu')
+    print(f'0. Exit the program')
+
+    option = input('Enter your choice: ')
+    val = getIntegerInput(option)
+
+    if val == 0:
+      print(f'Exiting the program...')
+      break
+    elif val == len(params)+1:
+      option = 'r'
+      break
+    elif val > 0 and val <= len(params):
+      tmpStr= ''
+      str = params[val-1]
+      if not lastLevel:
+        option, tmpStr = choice(
+          message='For which frames setting do you want to perform the operations:',
+          lastLevel=True,
+        	params=FPS_LIST)
+
+      if option != 'r':
+        str = str if emptyString(tmpStr) else  os.path.join(tmpStr, str)		
+        break
+
+    else:
+      print(f'Invalid input, try again.')
+
+  return option, str
+
 # This function puts all the modules together to import and process the data
-def main(save=True, operation=NEW, phase=ALL, inFile=INPUT_FILE, outPath=''):
+def main(operation=NEW, phase=ALL, outPath=''):
+
+  option = '-2'
+  srcPath = ''
+
+  if operation == TEST:
+    option = 't'
+    srcPath = SRC_PATH
+
+  while option not in ['0', 't']:
+      print('Please select the type of operation you want to perform:')
+      print('1. Import and process data')
+      print('2. Import data')
+      print('0. Exit the program')
+
+      option = input('Enter your choice: ')
+
+      if option == '1':
+        option, srcPath = choice(
+          message='Please select the file on which you want to perform the operations:',
+          lastLevel=False,
+          params=CSV_LIST)
+
+        if option not in ['0', 'r']:
+          break
+
+      elif option == '2':
+        option, srcPath = choice(
+          message='Please select the file on which you want to perform the operations:',
+          lastLevel=False,
+          params=OTHER_LIST)
+
+        if option not in ['0', 'r']:
+          break
+
+      elif option == '0':
+          print('Exiting the program...')
+      else:
+          print('Invalid input, try again.')
+
+      print()
+
+  if option == '0':
+      return True
+  else:
+    srcPath = os.path.join(DATA_PATH, srcPath)
+    print(f'File: {srcPath}')
 
   # new experiment
-  if operation == NEW:
+  if operation == NEW or operation == TEST:
     experiment = Experiment(operation=operation,
-                            inFile=inFile,
+                            inFile=srcPath,
                             outPath=outPath,
                             verbose=DEBUG
                             )

@@ -49,7 +49,6 @@ class CSVModel:
         self._rotations = {}
         self._positions = {}
         self._kfPositions = {}
-        self._rlPositions = {}
         self._splPositions = {}
 
         if data is not None:
@@ -96,14 +95,6 @@ class CSVModel:
         self._kfPositions = s
 
     @property
-    def rlPositions(self):
-        return self._rlPositions
-
-    @rlPositions.setter
-    def rlPositions(self, s):
-        self._rlPositions = s
-
-    @property
     def splPositions(self):
         return self._splPositions
 
@@ -120,6 +111,9 @@ class CSVModel:
     def getID(self):
         return self._description['ID']
 
+    def isMarker(self):
+        return self._description['Type'] == "Marker"
+
     # It initializes the data object.
     def initialize(self, data, header=None):
 
@@ -132,8 +126,14 @@ class CSVModel:
 
             if i == TYPE:
                 self._description['Type'] = part.replace(SPACE_REPLACEMENT, ' ')
+                if MARKER.lower() in self._description['Type'].lower():
+                    self._description['Type'] = MARKER[0].upper() + MARKER[1:]
+
             elif i == NAME:
                 self._description['Name'] = part.replace(SPACE_REPLACEMENT, ' ')
+                if self._description['Name'].find(":") != -1:
+                    self._description['Name'] = self._description['Name'].split(":")[1]
+
             elif i == ID:
                 self._description['ID'] = part.replace(SPACE_REPLACEMENT, ' ')
 

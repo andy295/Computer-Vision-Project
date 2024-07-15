@@ -52,32 +52,23 @@ SKELETON = 'skeleton'
 ANIMATION = 'animation'
 MARKER = 'marker'
 
-SRC_FILE = RIGID_BODY + EXTENSIONS[Extension.csv]
-# SRC_FILE = SKELETON + EXTENSIONS[Extension.csv]
-# SRC_FILE = ANIMATION + EXTENSIONS[Extension.bvh]
-# SRC_FILE = MARKER + EXTENSIONS[Extension.c3d]
-
-FPS = 30
+CSV_LIST = [RIGID_BODY + EXTENSIONS[Extension.csv], SKELETON + EXTENSIONS[Extension.csv]]
+OTHER_LIST = [ANIMATION + EXTENSIONS[Extension.bvh], MARKER + EXTENSIONS[Extension.c3d]]
+FPS_LIST = ['60fps', '360fps']
 
 #TYPE OF FILTERING
 KALMAN_FILTER = 'kfPositions'
-LINEAR_REGRESSION = 'rlPositions'
 SPLINE_INTERPOLATION = 'splPositions'
 
 # PATHS
-if platform.system() == 'Linux':
-    SRC_PATH = 'Data/60fps'
-elif platform.system() == 'Windows':
-    SRC_PATH = r'C:\Users\utente\Documents\VitaaTrento\Anno1Semestre2\ComputerVision\progettoCV\Computer-Vision-Project\Project\Data'
-    SAVE_VIDEO_PATH = r'C:\Users\utente\Documents\VitaaTrento\Anno1Semestre2\ComputerVision\progettoCV\Computer-Vision-Project\Project\Video\\'
-    SAVE_IMAGES_PATH = r'C:\Users\utente\Documents\VitaaTrento\Anno1Semestre2\ComputerVision\progettoCV\Computer-Vision-Project\Project\Video\images\\'
-else:
-    print('Error: Unsupported OS')
-    sys.exit()
+ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-SRC_PATH = os.path.join(ROOT_DIR, SRC_PATH) 
-INPUT_FILE = os.path.join(SRC_PATH, SRC_FILE)
+DATA_PATH = os.path.join(ROOT_PATH, f'Data')
+SAVE_PATH = os.path.join(ROOT_PATH, f'Saved')
+
+# used for testing purposes
+SRC_FILE = RIGID_BODY + EXTENSIONS[Extension.csv]
+SRC_PATH = os.path.join(DATA_PATH, SRC_FILE)
 
 # CSV STRUCTURE
 # the application is thought to work with CVS data version 1.23
@@ -148,6 +139,7 @@ LOAD = 'l'
 
 # EXPERIMENT OPERATIONS
 NEW = 0
+TEST = 1
 
 # just for developing purposes
 NOTHING = -1
@@ -165,4 +157,3 @@ WARNING = 3
 DEBUG = 4
 
 VERBOSE = DEBUG
-DECIMAL_DIGITS = 2

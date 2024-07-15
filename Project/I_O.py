@@ -3,7 +3,7 @@ import c3d # if library not found: pip install c3d
 
 from global_constants import *
 
-folderPath = os.path.join(ROOT_DIR, BHV_DIR)
+folderPath = os.path.join(ROOT_PATH, BHV_DIR)
 sys.path.append(folderPath)
 
 from BVH_FILE import *
@@ -291,15 +291,15 @@ def extractDataCSV(data):
             if outerKey != HEADER:
                 middleDict[TIME] = {TIME_SHORT: times}
 
-        # printing the structure
-        for outerKey in sorted(dataDict.keys()):
-            print(outerKey + ':')
-            middleDict = dataDict[outerKey]
-            for middleKey in sorted(middleDict.keys()):
-                print('\t' + middleKey + ':')
-                innerDict = middleDict[middleKey]
-                for innerKey in sorted(innerDict.keys()):
-                    print('\t\t' + innerKey + ':')#, innerDict[innerKey][0:3])
+        # # printing the structure
+        # for outerKey in sorted(dataDict.keys()):
+        #     print(outerKey + ':')
+        #     middleDict = dataDict[outerKey]
+        #     for middleKey in sorted(middleDict.keys()):
+        #         print('\t' + middleKey + ':')
+        #         innerDict = middleDict[middleKey]
+        #         for innerKey in sorted(innerDict.keys()):
+        #             print('\t\t' + innerKey + ':')#, innerDict[innerKey][0:3])
 
     except Exception as e:
         print(f'Error: Impossible to extract data from CSV file - {e}\n')

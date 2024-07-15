@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.interpolate import splprep, splev, CubicSpline
-from sklearn.linear_model import LinearRegression
+from scipy.interpolate import CubicSpline
 
 from global_constants import *
 
@@ -17,78 +16,27 @@ def filterData(filePath, data):
 
     # only data extracted from rigidbody.csv file can be filtered
     if fExt == EXTENSIONS[Extension.csv] and fName == RIGID_BODY:
+
+        # perform spline interpolation
         splineInterpolation(data)
+
+        # perform Kalman filter
         for model in data:
-            print(f'Filtering data for model: {model.getName()}')
-            linearRegression(model)
+            print(f'Performing Kalman filter on model: {model.getName()}')
             kalmanFilter(model)
             print(f'Data correctly filtered\n')
 
-
-# Function to prepare data by separating into training and test sets
-def linearRegressionPrepareData(df, column):
-
-    # training data: drop rows where the target column is 0.0
-    trainDF = df[df[column] != 0.0]
-    XTrain = trainDF[TIME_SHORT].values.reshape(-1, 1)
-    yTrain = trainDF[column].values
-
-    # test data: rows where the target column is 0.0
-    testDF = df[df[column] == 0.0]
-    XTest = testDF[TIME_SHORT].values.reshape(-1, 1)
-
-    return XTrain, yTrain, XTest, testDF.index
-
-# Function to perform linear regression and predict missing values
-def linearRegressionPredict(df, column):
-
-    XTrain, yTrain, XTest, testIndex = linearRegressionPrepareData(df, column)
-
-    model = LinearRegression()
-    model.fit(XTrain, yTrain)
-
-    predictions = model.predict(XTest)
-
-    # fill the missing values with predictions
-    df.loc[testIndex, column] = predictions
-
-# Function to compute the linear regression to estimate missing values
-def linearRegression(sourceModel):
-
-    # input data
-    data = {
-        TIME_SHORT: sourceModel.time,
-        X: sourceModel.positions[X],
-        Y: sourceModel.positions[Y],
-        Z: sourceModel.positions[Z]
-    }
-
-    # convert to pandas DataFrame
-    df = pd.DataFrame(data)
-
-    # perform linear regression for each coordinate
-    for coord in [X, Y, Z]:
-        linearRegressionPredict(df, coord)
-
-    # copy the data back to the original model
-    sourceModel.rlPositions[X] = df[X].to_list()
-    sourceModel.rlPositions[Y] = df[Y].to_list()
-    sourceModel.rlPositions[Z] = df[Z].to_list()
-
-    if PLOT_CHART:
-        # plot the results
-        plotData("Regression Line", sourceModel.positions, sourceModel.rlPositions)
-
-def initKalmanFilter(dt=5, vel=1, acc=1, processNoiseStD=0.1, measurementNoiseStD=0.001):
+def initKalmanFilter(dt=5, vel=1, acc=1, processNoiseStD=1e-5, measurementNoiseStD=1e-5):
     # time step, we are assuming it constant for simplicity
     dtTo2 = 0.5 * dt**2
 
+    KF_DINAMIC_PARAMETERS = 9
+    measureParameters = 3
+
     # instantiate and initialize the Kalman filter
-    kalman = cv2.KalmanFilter(9, 3)
-    kalman.measurementMatrix = np.array([
-        [1, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 1, 0, 0, 0, 0, 0, 0]], np.float32)
+    kalman = cv2.KalmanFilter(KF_DINAMIC_PARAMETERS, measureParameters)
+
+    kalman.measurementMatrix = np.eye(measureParameters, KF_DINAMIC_PARAMETERS, dtype=np.float32)
 
     kalman.transitionMatrix = np.array([
         [1, 0, 0, vel*dt, 0, 0, acc*dtTo2, 0, 0],
@@ -101,9 +49,13 @@ def initKalmanFilter(dt=5, vel=1, acc=1, processNoiseStD=0.1, measurementNoiseSt
         [0, 0, 0, 0, 0, 0, 0, 1, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 1]], np.float32)
 
-    kalman.processNoiseCov = np.eye(9, dtype=np.float32) * processNoiseStD
+    kalman.processNoiseCov = np.eye(KF_DINAMIC_PARAMETERS, dtype=np.float32) * processNoiseStD
 
-    kalman.measurementNoiseCov = np.eye(3, dtype=np.float32) * measurementNoiseStD
+    kalman.measurementNoiseCov = np.eye(measureParameters, dtype=np.float32) * measurementNoiseStD
+
+    # Initialize state
+    kalman.statePost = np.zeros((KF_DINAMIC_PARAMETERS, 1), dtype=np.float32)
+    kalman.statePre = np.zeros((KF_DINAMIC_PARAMETERS, 1), dtype=np.float32)
 
     return kalman
 
@@ -154,34 +106,36 @@ def kalmanFilter(sourceModel):
 # data is a list of model, i.e. a list of markers
 def splineInterpolation(data):
 
+    print(f'Performing spline interpolation\n')
+
     markerList = []
     # obtaining a list of list of positions in time
     for model in data:
         tempList = list(zip(model.positions[X], model.positions[Y], model.positions[Z]))
         markerList.append(tempList)
     markerList = np.array(markerList)
-    
+
     # Number of markers
     num_markers, _, _ = markerList.shape
 
     # Identify time entries with missing values
     missing_indices = np.where((markerList == (0, 0, 0)).all(axis=0).all(axis=1))[0]
     available_indices = np.where(~(markerList == (0, 0, 0)).all(axis=0).all(axis=1))[0]
-    
+
     # Function to interpolate and fill missing values for each marker
     def interpolate_and_fill(markerList, missing_indices, available_indices):
         filledMarkerList = np.copy(markerList)
         t = available_indices  # Time points for available data
-        
+
         for marker in range(num_markers):
             for i in range(3):  # For x, y, z
                 values = markerList[marker, available_indices, i]
                 cs = CubicSpline(t, values)
                 filled_values = cs(missing_indices)
                 filledMarkerList[marker, missing_indices, i] = filled_values
-                
+
         return filledMarkerList
-    
+
     # Fill the missing data
     filledMarkerList = interpolate_and_fill(markerList, missing_indices, available_indices)
     for i, model in enumerate(data):
@@ -189,12 +143,13 @@ def splineInterpolation(data):
             model.splPositions[X] = xList
             model.splPositions[Y] = yList
             model.splPositions[Z] = zList
-            
-    if PLOT_CHART:   
+
+    print(f'Data correctly filtered\n')
+
+    if PLOT_CHART:
         # plot the results for each marker
         for i, model in enumerate(data):
             plotData("Spline interpolation for marker %d" % i, model.positions, model.splPositions)
-
 
 def plotData(operation, firstDataPoints, secondDataPoints=None):
 
