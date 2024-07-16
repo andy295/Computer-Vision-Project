@@ -18,8 +18,7 @@ def plotData(filePath=None, data=None):
           print(f'Please select the type of rigid body visualization')
           print(f'1. Original rigid body points')
           print(f'2. Kalman filtered rigid body points')
-          print(f'3. Linear regression estimated rigid body points')
-          print(f'4. Spline interpolation estimated rigid body points')
+          print(f'3. Spline interpolation estimated rigid body points')
           print(f'0. Exit the program')
 
           option = input(f'Enter your choice: ')
@@ -32,10 +31,6 @@ def plotData(filePath=None, data=None):
             markerRigidBodyPlot(data, fName, KALMAN_FILTER)
 
           elif option == '3':
-            print(f'Linear regression estimated rigid body points')
-            markerRigidBodyPlot(data, fName, LINEAR_REGRESSION)
-
-          elif option == '4':
             print(f'Spline interpolation estimated rigid body points')
             markerRigidBodyPlot(data, fName, SPLINE_INTERPOLATION)
 

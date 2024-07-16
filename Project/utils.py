@@ -18,25 +18,22 @@ def emptyString(string):
 # then iterates over each word, extracting the first character of each wordusing
 # finally, it joins these first letters together into a single string.
 def extractFirstLetters(string):
-    # Split the string into words
-    words = string.split()
+  # Split the string into words
+  words = string.split()
 
-    # Extract the first letter of each word
-    first_letters = [word[0] for word in words]
+  # Extract the first letter of each word
+  first_letters = [word[0] for word in words]
 
-    # Join the first letters into a single string
-    result = ''.join(first_letters)
+  # Join the first letters into a single string
+  result = ''.join(first_letters)
 
-    return result
+  return result
 
 # Function to safely convert user input to an integer
 def getIntegerInput(text):
-    while True:
-        value = input(text)
-        try:
-            # Attempt to convert the input to an integer
-            value = int(value)
-            return value
-        except ValueError:
-            # If conversion fails, inform the user and prompt again
-            print('Invalid input. Please enter a valid integer.\n')
+  try:
+    # Attempt to convert the input to an integer
+    value = int(text)
+    return value
+  except ValueError:
+    return -1

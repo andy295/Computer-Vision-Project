@@ -153,7 +153,7 @@ class Experiment():
     fExt = fExt.lower()
     if fExt not in INPUT_EXTENSIONS:
       print(f'Error: Invalid input file extension: {fExt}\n')
-      return False    
+      return False
 
     if not emptyString(self._outPath):
       if not os.path.isdir(self._outPath):
@@ -225,7 +225,7 @@ class Experiment():
 
     if models is None:
       plotData(self._inFile, self._models)
-    else:  
+    else:
       plotData(self._inFile, models)
 
   def filterModelsData(self):
@@ -233,7 +233,7 @@ class Experiment():
     print(f'Filtering data\n')
 
     filterData(self._inFile, self._models)
-  
+
     print(f'Data correctly filtered\n')
 
   # It ensures the sequential execution of the experiment steps and provides
