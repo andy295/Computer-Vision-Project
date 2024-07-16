@@ -157,7 +157,7 @@ def read_bvh(file_name: str, start=None, end=None,order=None, world=False, need_
     elif order != 'xyz':
         rotations = Quaternions.from_euler(np.radians(rotations), order=order, world=world)
         rotations = np.degrees(rotations.euler())
-        
+
     return Animation(rotations, positions, orients, offsets, parents), names, frame_time
 
 
