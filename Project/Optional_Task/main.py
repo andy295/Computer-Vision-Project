@@ -6,8 +6,6 @@ SKINNING_PATH = os.path.join(ROOT_PATH, 'lib\\deep-motion-editing\\blender_rende
 ANIMATION_PATH = os.path.join(ROOT_PATH, '..\\Data\\360fps\\animation.bvh')
 CHARACTER_PATH = os.path.join(ROOT_PATH, '..\\Data\\UE5\\Content\\X-Bot.fbx')
 
-TEST = True
-
 def main():
 
 	while True:
@@ -16,10 +14,7 @@ def main():
 		print('2. Skinning')
 		print('0. Exit the program')
 
-		if TEST:
-			option = '2'
-		else:
-			option = input('Enter your choice: ')
+		option = input('Enter your choice: ')
 
 		if option == '1':
 			os.chdir(RENDERING_PATH)
