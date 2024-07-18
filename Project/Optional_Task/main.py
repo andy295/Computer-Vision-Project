@@ -1,10 +1,9 @@
 import os
 
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
-RENDERING_PATH = os.path.join(ROOT_PATH, 'lib\\deep-motion-editing\\blender_rendering\\')
-SKINNING_PATH = os.path.join(ROOT_PATH, 'lib\\deep-motion-editing\\blender_rendering\\')
+DME_PATH = os.path.join(ROOT_PATH, 'lib\\deep-motion-editing\\blender_rendering\\')
 ANIMATION_PATH = os.path.join(ROOT_PATH, '..\\Data\\360fps\\animation.bvh')
-CHARACTER_PATH = os.path.join(ROOT_PATH, '..\\Data\\UE5\\Content\\X-Bot.fbx')
+CHARACTER_PATH = os.path.join(ROOT_PATH, 'Data\\Character\\X-Bot.fbx')
 
 def main():
 
@@ -17,11 +16,11 @@ def main():
 		option = input('Enter your choice: ')
 
 		if option == '1':
-			os.chdir(RENDERING_PATH)
+			os.chdir(DME_PATH)
 			os.system(f"blender -P render.py -- --bvh_path={ANIMATION_PATH}")
 			break
 		elif option == '2':
-			os.chdir(SKINNING_PATH)
+			os.chdir(DME_PATH)
 			os.system(f"blender -P skinning.py -- --bvh_file={ANIMATION_PATH} --fbx_file={CHARACTER_PATH}")
 			break
 		elif option == '0':
