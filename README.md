@@ -14,7 +14,7 @@
 
 ## Overview
 
-The project aims to develop a comprehensive understanding of motion capture (mocap) technology, facilitating a deep learning process and enabling students to effectively interact with and manage mocap data. The development involves solving three different tasks that explore the fundamentals and applications of mocap technology.
+The project aims to develop a comprehensive understanding of motion capture (mocap) technology, facilitating a deep learning process and enabling students to effectively manage and interact with mocap data. The development involves solving three different tasks that explore the fundamentals and applications of mocap technology.
 1. **Task 1: Understanding Standard Output Files**
 	- We familiarized ourselves with the standard output files of a motion capture system.
 	- Using Python, we visualized human skeleton and rigid body data in 3D.
@@ -59,7 +59,7 @@ The structure of the project is as follows:
 ### Task 1
 The goal was to familiarize ourselves with the standard output files of a motion capture system. We were provided with files in three different formats: CSV, BVH, and C3D.
 
-For the CSV files, from the first file we extracted the x, y, and z coordinates for each joint of the skeleton, along with their connections. From the second one, we extracted the coordinates of the markers of a rigid body. The data for each object was then plotted in 3D using the Matplotlib library, allowing us to observe the positions of the various elements that compose the objects in a 3D space.
+For the CSV files, we developed a custom solution in Python to read their content. From  the first file we extracted the x, y, and z coordinates for each joint of the skeleton, along with their connections. From the second one, we extracted the coordinates of the markers of a rigid body. The data for each object were then plotted in 3D using the Matplotlib library, allowing us to observe the positions of the various elements that compose the objects in a 3D space.
 
 | Skeleton | Rigid Body |
 | - | - |
@@ -90,11 +90,12 @@ We stored the necessary information in JSON files. Then we used them to achieve 
 ### Usage
 The project was developed in `Windows 10` environment using `Python 3.10.9` and `Unreal Engine 5.4.3`. However, with appropriate adjustments, it is possible to use the proposed solution on other enviroments versions.
 
+To run the project, simply execute the `main.py` script. 
 ```
 python3 Project\main.py
 ```
 
-To run the project, simply execute the `main.py` script. The solution will provide instructions on available operations. By following these instructions, users can accomplish all the described tasks.
+The solution will provide instructions on available operations. By following these instructions, users can accomplish all the described tasks.
 
 ## Optional Task
 In the optional task, the objective was to render the provided `BHV` file in `Blender`. We interacted with Blender using its `Python APIs`. To accomplish this task, we relied on [**Deep-Motion-Editing**](https://github.com/DeepMotionEditing/deep-motion-editing) library. Initially designed for `non-Windows` environments, modifications to the library were necessary due to compatibility issues.
@@ -104,8 +105,9 @@ In the optional task, the objective was to render the provided `BHV` file in `Bl
 ### Usage
 The project was developed in `Windows 10` environment using `Python 3.10.9` and `Unreal Engine 5.4.3`. However, with appropriate adjustments, it is possible to use the proposed solution on other enviroments versions.
 
+To run the project, simply execute the `main.py` script. 
 ```
 python3 Project\Optional_Task\main.py
 ```
 
-To run the project, simply execute the `main.py` script. The solution will provide instructions on available operations. By following these instructions, users can accomplish all the described tasks.
+The solution will provide instructions on available operations. By following these instructions, users can accomplish all the described tasks.
