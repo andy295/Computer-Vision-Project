@@ -59,7 +59,7 @@ The structure of the project is as follows:
 ### Task 1
 The goal was to familiarize ourselves with the standard output files of a motion capture system. We were provided with files in three different formats: CSV, BVH, and C3D.
 
-For the CSV files, we developed a custom solution in Python to read their content. From  the first file we extracted the x, y, and z coordinates for each joint of the skeleton, along with their connections. From the second one, we extracted the coordinates of the markers of a rigid body. The data for each object were then plotted in 3D using the Matplotlib library, allowing us to observe the positions of the various elements that compose the objects in a 3D space.
+For the CSV files, we developed a custom solution in Python to read their content. From  the first file we extracted the x, y, and z coordinates for each joint of the skeleton, along with their connections. From the second one, we extracted the coordinates of the markers of a rigid body. The data for each object were then plotted in 3D using the Open3d library, allowing us to observe the positions of the various elements that compose the objects in a 3D space.
 
 | Skeleton | Rigid Body |
 | - | - |
