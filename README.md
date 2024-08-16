@@ -70,7 +70,7 @@ For the BVH and C3D files, we decided to use some of the libraries suggested dur
 ### Task 2
 Task 2 involves using post-processing methodologies on the rigid body data to address the problem of flickering caused by occlusion phenomena. We tackled this issue by implementing two filters: the Kalman filter and the Spline interpolation filter.
 
-| Skeleton | Rigid Body |
+| Kalman filter | Spline interpolation filter |
 | - | - |
 | ![](./Project/Results/Task_2/rigid_body_kalman.gif) | ![](./Project/Results/Task_2/rigid_body_spline.gif) |
 
