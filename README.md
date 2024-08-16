@@ -24,7 +24,7 @@ The project aims to develop a comprehensive understanding of motion capture (moc
 3. **Task 3: Projecting 3D Joint Positions onto the 2D Camera Plane**
 	- Utilizing Unreal Engine and our knowledge of camera geometry, we projected 3D joint positions onto the 2D camera plane.
 
-We present the code used to develop our solution, along with the implementation choices and assumptions that enabled us to achieve the proposed results. More details about the project's development can be found in the accompanying  [Report]().
+We present the code used to develop our solution, along with the implementation choices and assumptions that enabled us to achieve the proposed results. More details about the project's development can be found in the accompanying  [Report](./Project/Documentation/Report.pdf).
 
 ## Project Sturcture
 The `Project` folder contains all the files and scripts necessary to run the project.
@@ -85,7 +85,7 @@ We stored the necessary information in JSON files. Then we used them to achieve 
 
 | 3D to 2D projection |
 | - |
-| ![](./) |
+| ![](./Project/Results/Task_3/Projected_points.png) |
 
 ### Usage
 The project was developed in `Windows 10` environment using `Python 3.10.9` and `Unreal Engine 5.4.3`. However, with appropriate adjustments, it is possible to use the proposed solution on other enviroments versions.
