@@ -62,9 +62,12 @@ SPLINE_INTERPOLATION = 'splPositions'
 
 # PATHS
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
-
 DATA_PATH = os.path.join(ROOT_PATH, f'Data')
 SAVE_PATH = os.path.join(ROOT_PATH, f'Saved')
+SAVE_VIDEO_PATH = os.path.join(ROOT_PATH, f'Video')
+ACTOR_DATA_PATH = os.path.join(ROOT_PATH, 'Data', 'UnrealEngine5', 'actor_data.json')
+FRAME_IMAGE_PATH = os.path.join(ROOT_PATH, 'Data', 'UnrealEngine5', 'CVMap.')
+CAMERA_DATA_PATH = os.path.join(ROOT_PATH, 'Data', 'UnrealEngine5', 'camera_data.json')
 
 # used for testing purposes
 SRC_FILE = RIGID_BODY + EXTENSIONS[Extension.csv]

@@ -1,8 +1,10 @@
 import open3d as o3d
 import pyautogui
 import shutil
-
+import cv2
 from global_constants import *
+
+FPS = 64
 
 # data is a list of models. A model is a group of columns (i.e. the model 'marker' or 'bone')
 def plotData(filePath=None, data=None):
@@ -83,20 +85,15 @@ def getIndex(start, dictionary):
   return -1
 
 
-def visualizeSequence(visualizer, markersList, fName, SAVE):
+def visualizeSequence(visualizer, markersList, fName, SAVE_VIDEO):
 
-  if SAVE:
-    # # Get screen size
-    # screen_size = (pyautogui.size().width, pyautogui.size().height)
-    # # Define the codec using VideoWriter_fourcc() and create a VideoWriter object
-    # fourcc = cv2.VideoWriter_fourcc(*"XVID")
-    # out = cv2.VideoWriter(SAVE_VIDEO_PATH + fName, fourcc, FPS, screen_size)
-    # cv2.namedWindow("Recording", cv2.WINDOW_NORMAL)
-    # cv2.resizeWindow("Recording", 480, 270)
-    # Iteration over all the point clouds
+  videoWriter = cv2.VideoWriter(SAVE_VIDEO_PATH + fName + '.avi', cv2.VideoWriter_fourcc(*'DIVX'), FPS, (720, 480))
+  if SAVE_VIDEO:
     for i, marker in enumerate(markersList):
-      # if i % 3 == 0: #skip every 3rd frame to reduce computations
-      #   continue
+      if i % 3 == 0: #skip every 3rd frame to reduce computations
+        continue
+      if i % 5 == 0: #skip every 5th frame to reduce computations
+        continue
       visualizer.clear_geometries() #clears any existing geometries from the visualizer
       pcd = o3d.geometry.PointCloud()
       pcd.points = o3d.utility.Vector3dVector(marker) #sets the points of the pcd from the points in the marker tuple
@@ -104,27 +101,22 @@ def visualizeSequence(visualizer, markersList, fName, SAVE):
       visualizer.update_geometry(pcd)
       visualizer.poll_events()
       visualizer.update_renderer()
-      # Capture screenshot
-      img = pyautogui.screenshot()
-      # Convert the image into numpy array representation
-      frame = np.array(img)
-      # Write the RBG image to file
-      out.write(frame)
-      # Display screen/frame being recorded
-      cv2.imshow('Recording', frame)
+      # image = visualizer.capture_screen_float_buffer(do_render = True)
+      # image = np.asarray(image)
+      # images.append(image)
+      image = visualizer.capture_screen_float_buffer(do_render=True)
+      image = np.asarray(image)
+      image = (image * 255).astype(np.uint8)  # Convert to 8-bit image
+      image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)  # Convert to BGR for OpenCV
+      # Write the frame to the video
+      videoWriter.write(image)
 
-      # Wait for the user to press 'q' key to stop the recording
-      if cv2.waitKey(1) == ord('q'):
-        break
-
-    # Release the VideoWriter object
-    # out.release()
-    # cv2.destroyAllWindows()
+    videoWriter.release()
 
   else:
     for i, marker in enumerate(markersList):
-      # if i % 3 == 0: #skip every 3rd frame to reduce computations
-      #   continue
+      if i % 2 == 0: #skip every 3rd frame to reduce computations
+        continue
       visualizer.clear_geometries() #clears any existing geometries from the visualizer
       pcd = o3d.geometry.PointCloud()
       pcd.points = o3d.utility.Vector3dVector(marker) #sets the points of the pcd from the points in the marker tuple
@@ -141,52 +133,10 @@ def setVisualizer(pointSize):
   # Creation of the visualizer window
   visualizer = o3d.visualization.Visualizer()
   visualizer.create_window(window_name='Open3D', width=720, height=480)
-  # visualizer.set_full_screen(True)
   visualizer.get_render_option().background_color = np.asarray([0, 0, 0]) #black background
   visualizer.get_render_option().point_size = pointSize
 
   return visualizer
-
-
-def recordAndSave(path, fName):
-
-  # Get screen size
-  screen_size = (pyautogui.size().width, pyautogui.size().height)
-  # Define the codec using VideoWriter_fourcc() and create a VideoWriter object
-  fourcc = cv2.VideoWriter_fourcc(*"XVID")
-  out = cv2.VideoWriter(path + fName, fourcc, FPS, screen_size)
-  cv2.namedWindow("Recording", cv2.WINDOW_NORMAL)
-  cv2.resizeWindow("Recording", 480, 270)
-  while True:
-    # Capture screenshot
-    img = pyautogui.screenshot()
-    # Convert the image into numpy array representation
-    frame = np.array(img)
-    # Write the RBG image to file
-    out.write(frame)
-    # Display screen/frame being recorded
-    cv2.imshow('Recording', frame)
-
-    # Wait for the user to press 'q' key to stop the recording
-    if cv2.waitKey(1) == ord('q'):
-        break
-
-  # Release the VideoWriter object
-  out.release()
-  cv2.destroyAllWindows()
-
-
-def clear_directory(directory, value):
-    if value == 0:
-        for filename in os.listdir(directory):
-            file_path = os.path.join(directory, filename)
-            try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-            except Exception as e:
-                print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 #plots the rigid body markers
 def markerRigidBodyPlot(data, fName, typeOfFiltering):
@@ -209,62 +159,40 @@ def markerRigidBodyPlot(data, fName, typeOfFiltering):
   #transform to list of tuples [xyz, xyz, xyz, xyz] where each tuple is a point cloud
   allMarkers = list(zip(*allMarkers)) 
   visualizer = setVisualizer(10)
-  visualizeSequence(visualizer, allMarkers, fName, SAVE = False)
-  #save the video
-  # while True:
-  #   print("Do you want to save the video?")
-  #   print("1. YES")
-  #   print("0. NO. Exit the program")
-
-  #   option = input("Enter your choice: ")
-  #   if option == '1':
-  #     print("Saving and showing video...")
-  #     visualizer = setVisualizer(10.0)
-  #     visualizeSequence(visualizer, allMarkers, fName, SAVE=True)
-  #     print("Video saved")
-  #     return True
-
-  #   elif option == '0':
-  #     print("Showing video...")
-  #     visualizer = setVisualizer(10.0)
-  #     visualizeSequence(visualizer, allMarkers, fName, SAVE=False)
-  #     print("Video not saved")
-  #     break # Exit the loop and end the program
-
-  #   else:
-  #     print("Invalid input, try again.")
+  visualizeSequence(visualizer, allMarkers, fName, SAVE_VIDEO = False)
 
 
 def skeletonMarkerPlot(data, fName):
 
     bonesMarkerList = []
     for model in data:
-      if model._description['Type'] == 'Bone Marker':
+      if model._description['Type'] == 'Marker':
         points = list(zip(model._positions['x'], model._positions['y'], model._positions['z']))
         bonesMarkerList.append(points)
 
     bonesMarkerList = list(zip(*bonesMarkerList)) #list of tuples [xyz, xyz, xyz, xyz]
 
-    # Creation of the visualizer window
-    visualizer = setVisualizer(8.0)
-
     while True:
       print("Do you want to save the video?")
       print("1. YES")
-      print("0. NO. Exit the program")
+      print("0. NO")
 
       option = input("Enter your choice: ")
       if option == '1':
         print("Saving and showing video...")
-        images = visualizeSequence(visualizer, bonesMarkerList, fName, True)
+        SAVE_VIDEO = True
+        visualizer = setVisualizer(8.0)
+        visualizeSequence(visualizer, bonesMarkerList, fName, SAVE_VIDEO)
         print("Video saved")
-        return True
+        break
 
       elif option == '0':
         print("Showing video...")
-        visualizeSequence(visualizer, bonesMarkerList, fName, False)
+        SAVE_VIDEO = False
+        visualizer = setVisualizer(8.0)
+        visualizeSequence(visualizer, bonesMarkerList, fName, SAVE_VIDEO)
         print("Video not saved")
-        break # Exit the loop and end the program
+        break
 
       else:
         print("Invalid input, try again.")
@@ -298,7 +226,7 @@ def skeletonJointsPlot(data, fName):
   }
 
   for model in data:
-    if model._description['Type'] != 'Bone Marker':
+    if model._description['Type'] != 'Marker':
       points = list(zip(model._positions['x'], model._positions['y'], model._positions['z']))
       bonesPosDict[model._description['Name']] = points
 
