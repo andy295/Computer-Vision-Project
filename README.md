@@ -24,7 +24,7 @@ The project aims to develop a comprehensive understanding of motion capture (moc
 3. **Task 3: Projecting 3D Joint Positions onto the 2D Camera Plane**
 	- Utilizing Unreal Engine and our knowledge of camera geometry, we projected 3D joint positions onto the 2D camera plane.
 
-We present the code used to develop our solution, along with the implementation choices and assumptions that enabled us to achieve the proposed results. More details about the project's development can be found in the accompanying  [Report]().
+We present the code used to develop our solution, along with the implementation choices and assumptions that enabled us to achieve the proposed results. More details about the project's development can be found in the accompanying  [Report](./Project/Documentation/Report.pdf).
 
 ## Project Sturcture
 The `Project` folder contains all the files and scripts necessary to run the project.
@@ -59,7 +59,7 @@ The structure of the project is as follows:
 ### Task 1
 The goal was to familiarize ourselves with the standard output files of a motion capture system. We were provided with files in three different formats: CSV, BVH, and C3D.
 
-For the CSV files, we developed a custom solution in Python to read their content. From  the first file we extracted the x, y, and z coordinates for each joint of the skeleton, along with their connections. From the second one, we extracted the coordinates of the markers of a rigid body. The data for each object were then plotted in 3D using the Matplotlib library, allowing us to observe the positions of the various elements that compose the objects in a 3D space.
+For the CSV files, we developed a custom solution in Python to read their content. From  the first file we extracted the x, y, and z coordinates for each joint of the skeleton, along with their connections. From the second one, we extracted the coordinates of the markers of a rigid body. The data for each object were then plotted in 3D using the Open3d library, allowing us to observe the positions of the various elements that compose the objects in a 3D space.
 
 | Skeleton | Rigid Body |
 | - | - |
@@ -70,7 +70,7 @@ For the BVH and C3D files, we decided to use some of the libraries suggested dur
 ### Task 2
 Task 2 involves using post-processing methodologies on the rigid body data to address the problem of flickering caused by occlusion phenomena. We tackled this issue by implementing two filters: the Kalman filter and the Spline interpolation filter.
 
-| Skeleton | Rigid Body |
+| Kalman filter | Spline interpolation filter |
 | - | - |
 | ![](./Project/Results/Task_2/rigid_body_kalman.gif) | ![](./Project/Results/Task_2/rigid_body_spline.gif) |
 
@@ -85,7 +85,7 @@ We stored the necessary information in JSON files. Then we used them to achieve 
 
 | 3D to 2D projection |
 | - |
-| ![](./) |
+| ![](./Project/Results/Task_3/Projected_points.png) |
 
 ### Usage
 The project was developed in `Windows 10` environment using `Python 3.10.9` and `Unreal Engine 5.4.3`. However, with appropriate adjustments, it is possible to use the proposed solution on other enviroments versions.
