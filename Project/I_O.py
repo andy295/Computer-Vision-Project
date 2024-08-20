@@ -151,9 +151,9 @@ def readCSV(filePath):
     print(f'Error: Impossible to read CSV file - {e}\n')
     return None
 
-  # if VERBOSE >= DEBUG:
-  #   for line in data:
-  #     print(f'{line}')
+  if VERBOSE >= DEBUG:
+    for line in data:
+      print(f'{line}')
 
   return data if len(data) > 0 else None
 
@@ -179,9 +179,10 @@ def readBVH(filePath):
     print(f'Error: Impossible to read BVH file - {e}\n')
     return None
 
-  # for key, value in data.items():
-  #     print("Key:", key)
-  #     print("Type of Value:", type(value))
+  if VERBOSE >= DEBUG:
+    for key, value in data.items():
+        print("Key:", key)
+        print("Type of Value:", type(value))
 
   return data
 
@@ -291,15 +292,16 @@ def extractDataCSV(data):
             if outerKey != HEADER:
                 middleDict[TIME] = {TIME_SHORT: times}
 
-        # # printing the structure
-        # for outerKey in sorted(dataDict.keys()):
-        #     print(outerKey + ':')
-        #     middleDict = dataDict[outerKey]
-        #     for middleKey in sorted(middleDict.keys()):
-        #         print('\t' + middleKey + ':')
-        #         innerDict = middleDict[middleKey]
-        #         for innerKey in sorted(innerDict.keys()):
-        #             print('\t\t' + innerKey + ':')#, innerDict[innerKey][0:3])
+        if VERBOSE >= DEBUG:
+          # printing the structure
+          for outerKey in sorted(dataDict.keys()):
+              print(outerKey + ':')
+              middleDict = dataDict[outerKey]
+              for middleKey in sorted(middleDict.keys()):
+                  print('\t' + middleKey + ':')
+                  innerDict = middleDict[middleKey]
+                  for innerKey in sorted(innerDict.keys()):
+                      print('\t\t' + innerKey + ':')#, innerDict[innerKey][0:3])
 
     except Exception as e:
         print(f'Error: Impossible to extract data from CSV file - {e}\n')
@@ -323,7 +325,7 @@ def extractDataC3D(dataReader):
         for i, points, analog in dataReader.read_frames():
 
             frameData = {}
-            for (x, y, z, err_est, cam_nr), label in zip(points, 
+            for (x, y, z, err_est, cam_nr), label in zip(points,
                                         dataReader.point_labels):
 
                 label = label.strip()

@@ -88,14 +88,23 @@ We stored the necessary information in JSON files. Then we used them to achieve 
 | ![](./Project/Results/Task_3/Projected_points.png) |
 
 ### Usage
-The project was developed in `Windows 10` environment using `Python 3.10.9` and `Unreal Engine 5.4.3`. However, with appropriate adjustments, it is possible to use the proposed solution on other enviroments versions.
+The project was developed in a `Windows 10` environment using `Python 3.10.9` and `Unreal Engine 5.4.3`. However, with appropriate adjustments, the proposed solution can be used in other environments as well.
 
-To run the project, simply execute the `main.py` script. 
+To run the project for the first two tasks, simply execute the `main.py` script:
+
 ```
-python3 Project\main.py
+python Project\main.py
 ```
 
 The solution will provide instructions on available operations. By following these instructions, users can accomplish all the described tasks.
+
+To run the project for the third task, simply execute the `unreal_skeleton_main.py` script.
+
+```
+python Project\unreal_skeleton_main.py
+```
+
+Alternatively, examples of the results from the implemented functionalities can be found in the `Result\Task_1`, `Result\Task_2` and `Result\Task_3` folders.
 
 ## Optional Task
 In the optional task, the objective was to render the provided `BHV` file in `Blender`. We interacted with Blender using its `Python APIs`. To accomplish this task, we relied on [**Deep-Motion-Editing**](https://github.com/DeepMotionEditing/deep-motion-editing) library. Initially designed for `non-Windows` environments, modifications to the library were necessary due to compatibility issues.
@@ -103,11 +112,13 @@ In the optional task, the objective was to render the provided `BHV` file in `Bl
 [![Video](./Project/Optional_Task/Results/Render/Render.png)](https://youtu.be/2TT5JsIz6_o)
 
 ### Usage
-The project was developed in `Windows 10` environment using `Python 3.10.9` and `Unreal Engine 5.4.3`. However, with appropriate adjustments, it is possible to use the proposed solution on other enviroments versions.
+The project was developed in a `Windows 10` environment using `Python 3.10.9` and `Blender 4.1`. However, with appropriate adjustments, the proposed solution can be used in other environments as well.
 
 To run the project, simply execute the `main.py` script. 
 ```
-python3 Project\Optional_Task\main.py
+python Project\Optional_Task\main.py
 ```
 
 The solution will provide instructions on available operations. By following these instructions, users can accomplish all the described tasks.
+
+Alternatively, examples of the results from the implemented functionalities can be found in the `Optional_Task\Results` folder.

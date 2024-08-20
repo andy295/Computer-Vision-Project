@@ -5,7 +5,6 @@ from global_constants import *
 
 FPS = 88
 
-# data is a list of models. A model is a group of columns (i.e. the model 'marker' or 'bone')
 def plotData(filePath=None, data=None):
     if data is None or filePath is None:
       print(f'Error: Invalid data or file path\n')
@@ -83,38 +82,43 @@ def getIndex(start, dictionary):
 
   return -1
 
-
-def visualizeSequence(visualizer, markersList, fName, typeOfFiltering, SAVE_VIDEO):
+# Function to render and optionally saves a sequence of 3D marker frames using a visualizer.
+# It processes each frame by updating the visualizer with new point cloud data and either
+# captures and writes the frames to a video file or simply displays them.
+# The function skips certain frames to reduce computation and finally releases resources
+# or closes the visualizer window.
+def visualizeSequence(visualizer, markersList, fName, SAVE_VIDEO):
 
   if SAVE_VIDEO:
     videoWriter = cv2.VideoWriter(os.path.join(SAVE_VIDEO_PATH, (typeOfFiltering + fName + '.avi')), cv2.VideoWriter_fourcc(*'DIVX'), FPS, (720, 480))
     for i, marker in enumerate(markersList):
-      if i % 3 == 0: #skip every 3rd frame to reduce computations
+      if i % 3 == 0: # skip every 3rd frame to reduce computations
         continue
       if i % 4 == 0: #skip every 4th frame to reduce computations
         continue
-      visualizer.clear_geometries() #clears any existing geometries from the visualizer
+      visualizer.clear_geometries() # clears any existing geometries from the visualizer
       pcd = o3d.geometry.PointCloud()
-      pcd.points = o3d.utility.Vector3dVector(marker) #sets the points of the pcd from the points in the marker tuple
-      visualizer.add_geometry(pcd) #adds the pcd to the visualizer for rendering
+      pcd.points = o3d.utility.Vector3dVector(marker) # sets the points of the pcd from the points in the marker tuple
+      visualizer.add_geometry(pcd) # adds the pcd to the visualizer for rendering
       visualizer.update_geometry(pcd)
       visualizer.poll_events()
       visualizer.update_renderer()
       image = visualizer.capture_screen_float_buffer(do_render=True)
       image = np.asarray(image)
-      image = (image * 255).astype(np.uint8)  # Convert to 8-bit image
-      image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)  # Convert to BGR for OpenCV
-      # Write the frame to the video
+      image = (image * 255).astype(np.uint8)  # convert to 8-bit image
+      image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)  # convert to BGR for OpenCV
+
+      # write the frame to the video
       videoWriter.write(image)
 
   else:
     for i, marker in enumerate(markersList):
       if i % 2 == 0: #skip every 2nd frame to reduce computations
         continue
-      visualizer.clear_geometries() #clears any existing geometries from the visualizer
+      visualizer.clear_geometries() # clears any existing geometries from the visualizer
       pcd = o3d.geometry.PointCloud()
       pcd.points = o3d.utility.Vector3dVector(marker) #sets the points of the pcd from the points in the marker tuple
-      visualizer.add_geometry(pcd) #adds the pcd to the visualizer for rendering
+      visualizer.add_geometry(pcd) # adds the pcd to the visualizer for rendering
       visualizer.update_geometry(pcd)
       visualizer.poll_events()
       visualizer.update_renderer()
@@ -125,7 +129,7 @@ def visualizeSequence(visualizer, markersList, fName, typeOfFiltering, SAVE_VIDE
 
 def setVisualizer(pointSize):
 
-  # Creation of the visualizer window
+  # creation of the visualizer window
   visualizer = o3d.visualization.Visualizer()
   visualizer.create_window(window_name='Open3D', width=720, height=480)
   visualizer.get_render_option().background_color = np.asarray([0, 0, 0]) #black background
@@ -133,7 +137,10 @@ def setVisualizer(pointSize):
 
   return visualizer
 
-#plots the rigid body markers
+# Function to visualize 3D marker data from a list of models. Depending on whether filtering
+# is applied, it either uses original or filtered marker positions. The function transforms
+# the marker data into a format suitable for visualization,
+# then uses a visualizer to display a sequence of the marker points.
 def markerRigidBodyPlot(data, fName, typeOfFiltering):
 
   allMarkers = []
@@ -144,14 +151,14 @@ def markerRigidBodyPlot(data, fName, typeOfFiltering):
       points = list(zip(model._positions[X], model._positions[Y], model._positions[Z]))
       allMarkers.append(points)
 
-  else: #takes the filtered points based on the filter requested
+  else: # takes the filtered points based on the filter requested
     # transform from dictionary[(X:x1,x2...), (Y:y1,y2...), (Z:z1,z2...)] to list of tuples (list[x, y, z])
     for model in data:
       filteredPoints = getattr(model, typeOfFiltering)
       points = list(zip(filteredPoints[X],filteredPoints[Y],filteredPoints[Z]))
       allMarkers.append(points)
   
-  #transform to list of tuples [xyz, xyz, xyz, xyz] where each tuple is a point cloud
+  # transform to list of tuples [xyz, xyz, xyz, xyz] where each tuple is a point cloud
   allMarkers = list(zip(*allMarkers)) 
   while True:
     print("Do you want to save the video?")
@@ -178,7 +185,7 @@ def markerRigidBodyPlot(data, fName, typeOfFiltering):
     else:
       print("Invalid input, try again.")
 
-
+# saves the video or just displays it using the `visualizeSequence` function.
 def skeletonMarkerPlot(data, fName, typeOfFiltering):
 
   bonesMarkerList = []
@@ -214,7 +221,9 @@ def skeletonMarkerPlot(data, fName, typeOfFiltering):
     else:
       print("Invalid input, try again.")
 
-
+# Function to visualize 3D skeleton data by plotting the joints and connecting bones.
+# It constructs a graph representing the skeleton structure, where each joint is connected
+# to others according to a predefined hierarchy.
 def skeletonJointsPlot(data, fName):
 
   bonesPosDict = {}
@@ -247,21 +256,21 @@ def skeletonJointsPlot(data, fName):
       points = list(zip(model._positions['x'], model._positions['y'], model._positions['z']))
       bonesPosDict[model._description['Name']] = points
 
-  # Get the lists of points from the dictionary values
+  # get the lists of points from the dictionary values
   lists_of_points = list(bonesPosDict.values())
 
-  # Use zip to combine corresponding points from each list into tuples
+  # use zip to combine corresponding points from each list into tuples
   lists_of_points = list(zip(*lists_of_points))
 
   vertices = []
-  #we adapt a list of tuples [xyz, xyz, xyz, xyz] to Open3D
+  # we adapt a list of tuples [xyz, xyz, xyz, xyz] to Open3D
   for skeletonPoints in lists_of_points:
     vertices.append(np.array(skeletonPoints))
 
-  # Create a Visualizer object
+  # create a Visualizer object
   visualizer = setVisualizer(10.0)
 
-  # Create line set to represent edges in the graph
+  # create line set to represent edges in the graph
   lines = []
   for start, ends in jointsGraph.items():
       start_idx = getIndex(start, bonesPosDict)
@@ -270,13 +279,13 @@ def skeletonJointsPlot(data, fName):
           lines.append([start_idx, end_idx])
 
   line_set = o3d.geometry.LineSet()
-  #line_set.points = o3d.utility.Vector3dVector(vertices)
+  # line_set.points = o3d.utility.Vector3dVector(vertices)
   line_set.lines = o3d.utility.Vector2iVector(lines)
 
-  # Set line color (e.g., red)
-  line_color = [1, 0, 0]  # RGB color (red)
+  # set line color (e.g., red)
+  line_color = [1, 0, 0] # RGB color (red)
 
-  # Create a LineSet with colored lines
+  # create a LineSet with colored lines
   line_set.colors = o3d.utility.Vector3dVector(np.tile(line_color, (len(lines), 1)))
 
   while True:
