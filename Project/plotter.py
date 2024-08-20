@@ -1,10 +1,9 @@
 import open3d as o3d
-import pyautogui
-import shutil
 import cv2
+import os
 from global_constants import *
 
-FPS = 64
+FPS = 88
 
 # data is a list of models. A model is a group of columns (i.e. the model 'marker' or 'bone')
 def plotData(filePath=None, data=None):
@@ -85,14 +84,14 @@ def getIndex(start, dictionary):
   return -1
 
 
-def visualizeSequence(visualizer, markersList, fName, SAVE_VIDEO):
+def visualizeSequence(visualizer, markersList, fName, typeOfFiltering, SAVE_VIDEO):
 
-  videoWriter = cv2.VideoWriter(SAVE_VIDEO_PATH + fName + '.avi', cv2.VideoWriter_fourcc(*'DIVX'), FPS, (720, 480))
+  videoWriter = cv2.VideoWriter(os.path.join(SAVE_VIDEO_PATH, (typeOfFiltering + fName + '.avi')), cv2.VideoWriter_fourcc(*'DIVX'), FPS, (720, 480))
   if SAVE_VIDEO:
     for i, marker in enumerate(markersList):
       if i % 3 == 0: #skip every 3rd frame to reduce computations
         continue
-      if i % 5 == 0: #skip every 5th frame to reduce computations
+      if i % 4 == 0: #skip every 4th frame to reduce computations
         continue
       visualizer.clear_geometries() #clears any existing geometries from the visualizer
       pcd = o3d.geometry.PointCloud()
@@ -101,9 +100,6 @@ def visualizeSequence(visualizer, markersList, fName, SAVE_VIDEO):
       visualizer.update_geometry(pcd)
       visualizer.poll_events()
       visualizer.update_renderer()
-      # image = visualizer.capture_screen_float_buffer(do_render = True)
-      # image = np.asarray(image)
-      # images.append(image)
       image = visualizer.capture_screen_float_buffer(do_render=True)
       image = np.asarray(image)
       image = (image * 255).astype(np.uint8)  # Convert to 8-bit image
@@ -111,11 +107,9 @@ def visualizeSequence(visualizer, markersList, fName, SAVE_VIDEO):
       # Write the frame to the video
       videoWriter.write(image)
 
-    videoWriter.release()
-
   else:
     for i, marker in enumerate(markersList):
-      if i % 2 == 0: #skip every 3rd frame to reduce computations
+      if i % 2 == 0: #skip every 2nd frame to reduce computations
         continue
       visualizer.clear_geometries() #clears any existing geometries from the visualizer
       pcd = o3d.geometry.PointCloud()
@@ -126,6 +120,7 @@ def visualizeSequence(visualizer, markersList, fName, SAVE_VIDEO):
       visualizer.update_renderer()
 
   visualizer.destroy_window()
+  videoWriter.release()
 
 
 def setVisualizer(pointSize):
@@ -158,44 +153,66 @@ def markerRigidBodyPlot(data, fName, typeOfFiltering):
   
   #transform to list of tuples [xyz, xyz, xyz, xyz] where each tuple is a point cloud
   allMarkers = list(zip(*allMarkers)) 
-  visualizer = setVisualizer(10)
-  visualizeSequence(visualizer, allMarkers, fName, SAVE_VIDEO = False)
+  while True:
+    print("Do you want to save the video?")
+    print("1. YES")
+    print("0. NO")
+
+    option = input("Enter your choice: ")
+    if option == '1':
+      print("Saving and showing video...")
+      SAVE_VIDEO = True
+      visualizer = setVisualizer(10.0)
+      visualizeSequence(visualizer, allMarkers, fName, typeOfFiltering, SAVE_VIDEO)
+      print("Video saved")
+      break
+
+    elif option == '0':
+      print("Showing video...")
+      SAVE_VIDEO = False
+      visualizer = setVisualizer(10.0)
+      visualizeSequence(visualizer, allMarkers, fName, typeOfFiltering, SAVE_VIDEO)
+      print("Video not saved")
+      break
+
+    else:
+      print("Invalid input, try again.")
 
 
-def skeletonMarkerPlot(data, fName):
+def skeletonMarkerPlot(data, fName, typeOfFiltering):
 
-    bonesMarkerList = []
-    for model in data:
-      if model._description['Type'] == 'Marker':
-        points = list(zip(model._positions['x'], model._positions['y'], model._positions['z']))
-        bonesMarkerList.append(points)
+  bonesMarkerList = []
+  for model in data:
+    if model._description['Type'] == 'Marker':
+      points = list(zip(model._positions['x'], model._positions['y'], model._positions['z']))
+      bonesMarkerList.append(points)
 
-    bonesMarkerList = list(zip(*bonesMarkerList)) #list of tuples [xyz, xyz, xyz, xyz]
+  bonesMarkerList = list(zip(*bonesMarkerList)) #list of tuples [xyz, xyz, xyz, xyz]
 
-    while True:
-      print("Do you want to save the video?")
-      print("1. YES")
-      print("0. NO")
+  while True:
+    print("Do you want to save the video?")
+    print("1. YES")
+    print("0. NO")
 
-      option = input("Enter your choice: ")
-      if option == '1':
-        print("Saving and showing video...")
-        SAVE_VIDEO = True
-        visualizer = setVisualizer(8.0)
-        visualizeSequence(visualizer, bonesMarkerList, fName, SAVE_VIDEO)
-        print("Video saved")
-        break
+    option = input("Enter your choice: ")
+    if option == '1':
+      print("Saving and showing video...")
+      SAVE_VIDEO = True
+      visualizer = setVisualizer(8.0)
+      visualizeSequence(visualizer, bonesMarkerList, fName, typeOfFiltering, SAVE_VIDEO)
+      print("Video saved")
+      break
 
-      elif option == '0':
-        print("Showing video...")
-        SAVE_VIDEO = False
-        visualizer = setVisualizer(8.0)
-        visualizeSequence(visualizer, bonesMarkerList, fName, SAVE_VIDEO)
-        print("Video not saved")
-        break
+    elif option == '0':
+      print("Showing video...")
+      SAVE_VIDEO = False
+      visualizer = setVisualizer(8.0)
+      visualizeSequence(visualizer, bonesMarkerList, fName, typeOfFiltering, SAVE_VIDEO)
+      print("Video not saved")
+      break
 
-      else:
-        print("Invalid input, try again.")
+    else:
+      print("Invalid input, try again.")
 
 
 def skeletonJointsPlot(data, fName):
@@ -262,17 +279,64 @@ def skeletonJointsPlot(data, fName):
   # Create a LineSet with colored lines
   line_set.colors = o3d.utility.Vector3dVector(np.tile(line_color, (len(lines), 1)))
 
-  # Iteration over all the point clouds
-  for skeletonPoints in vertices:
-    visualizer.clear_geometries()
-    pcd = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(skeletonPoints)
-    line_set.points = o3d.utility.Vector3dVector(skeletonPoints)
-    visualizer.add_geometry(pcd)
-    visualizer.add_geometry(line_set)
-    visualizer.update_geometry(pcd)
-    visualizer.update_geometry(line_set)
-    visualizer.poll_events()
-    visualizer.update_renderer()
+  while True:
+    print("Do you want to save the video?")
+    print("1. YES")
+    print("0. NO")
 
-  visualizer.destroy_window()
+    option = input("Enter your choice: ")
+    if option == '1':
+      print("Saving and showing video...")
+      # Iteration over all the point clouds
+      videoWriter = cv2.VideoWriter(os.path.join(SAVE_VIDEO_PATH, (fName + '.avi')), cv2.VideoWriter_fourcc(*'DIVX'), FPS, (720, 480))
+      for i, skeletonPoints in enumerate(vertices):
+        if i%3 == 0:
+          continue
+        if i%4 == 0:
+          continue
+        visualizer.clear_geometries()
+        pcd = o3d.geometry.PointCloud()
+        pcd.points = o3d.utility.Vector3dVector(skeletonPoints)
+        line_set.points = o3d.utility.Vector3dVector(skeletonPoints)
+        visualizer.add_geometry(pcd)
+        visualizer.add_geometry(line_set)
+        visualizer.update_geometry(pcd)
+        visualizer.update_geometry(line_set)
+        visualizer.poll_events()
+        visualizer.update_renderer()
+        image = visualizer.capture_screen_float_buffer(do_render=True)
+        image = np.asarray(image)
+        image = (image * 255).astype(np.uint8)  # Convert to 8-bit image
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)  # Convert to BGR for OpenCV
+        # Write the frame to the video
+        videoWriter.write(image)
+      videoWriter.release()
+      visualizer.destroy_window()
+      print("Video saved")
+      break
+
+    elif option == '0':
+      print("Showing video...")
+      for i, skeletonPoints in enumerate(vertices):
+        if i%3 == 0:
+          continue
+        if i%4 == 0:
+          continue
+        visualizer.clear_geometries()
+        pcd = o3d.geometry.PointCloud()
+        pcd.points = o3d.utility.Vector3dVector(skeletonPoints)
+        line_set.points = o3d.utility.Vector3dVector(skeletonPoints)
+        visualizer.add_geometry(pcd)
+        visualizer.add_geometry(line_set)
+        visualizer.update_geometry(pcd)
+        visualizer.update_geometry(line_set)
+        visualizer.poll_events()
+        visualizer.update_renderer()
+      
+      visualizer.destroy_window()
+      print("Video not saved")
+      break
+
+    else:
+      print("Invalid input, try again.")
+
