@@ -86,8 +86,8 @@ def getIndex(start, dictionary):
 
 def visualizeSequence(visualizer, markersList, fName, typeOfFiltering, SAVE_VIDEO):
 
-  videoWriter = cv2.VideoWriter(os.path.join(SAVE_VIDEO_PATH, (typeOfFiltering + fName + '.avi')), cv2.VideoWriter_fourcc(*'DIVX'), FPS, (720, 480))
   if SAVE_VIDEO:
+    videoWriter = cv2.VideoWriter(os.path.join(SAVE_VIDEO_PATH, (typeOfFiltering + fName + '.avi')), cv2.VideoWriter_fourcc(*'DIVX'), FPS, (720, 480))
     for i, marker in enumerate(markersList):
       if i % 3 == 0: #skip every 3rd frame to reduce computations
         continue
