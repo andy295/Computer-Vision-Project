@@ -3,8 +3,10 @@ import cv2
 import os
 from global_constants import *
 
-FPS = 88
+# The number of frames per second for the videos we want to save
+FPS = 90
 
+# An interactive menu to select what to plot
 def plotData(filePath=None, data=None):
     if data is None or filePath is None:
       print(f'Error: Invalid data or file path\n')

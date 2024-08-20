@@ -8,7 +8,10 @@ from global_constants import *
 from plotter import setVisualizer
 from scipy.spatial.transform import Rotation
 
-'''works only with the downloaded frames. Currently we have 0001, 0176, 0263, 0626'''
+# This script project the 3D points of the skeleton to a 2D image using the camera data from the json 
+# file. It works only with the downloaded frames. Currently we have 0001, 0176, 0263, 0626. 
+# To change the frame, change the number in FRAME_NR_PATH (must have 4 digits) and FRAME_NR variable
+
 FRAME_NR_PATH = '0626.jpg'
 FRAME_NR = 626
 WIDTH, HEIGHT = 1280, 720
@@ -78,6 +81,7 @@ bones_to_remove = ['root', 'center_of_mass', 'ik_foot_root', 'ik_hand_root', 'in
                 'thigh_correctiveRoot_r', 'thigh_bck_r', 'thigh_bck_lwr_r', 'thigh_fwd_r', 'thigh_fwd_lwr_r', 'thigh_in_r', 'thigh_out_r',
                 'thigh_twistCor_01_r', 'thigh_twistCor_02_r']
 
+# a class to store the skeleton data from the json file
 class SkeletonData:
     def __init__(self, coordinates, id):
         self.coordinates = coordinates
@@ -86,7 +90,7 @@ class SkeletonData:
     def __repr__(self):
         return f"SkeletonData(id={self.id}, coordinates={self.coordinates})"
 
-# convert a rotation matrix to a rotation vector and a translation vector 
+# convert a rotation matrix to a rotation vector and a translation vector
 def matrix_to_rot_vec(matrix):
     # Rodriguez convert a rotation matrix to a rotation vector
     rotation_vector, _ = cv2.Rodrigues(matrix[:3, :3])
@@ -148,16 +152,16 @@ def get_all_skeleton_frames(bones_to_remove):
                     bones.append(bone.get('name'))
             skeleton_frame = SkeletonData(skeleton_frame, frame)
             all_frames_skeleton_position.append(skeleton_frame)
-
+    
     # remove the non necessary bones
     del all_frames_skeleton_position[0]
     for i in range(len(all_frames_skeleton_position)):
         frame = all_frames_skeleton_position[i]
         useful_bones = [bone for bone in frame.coordinates if bone.id not in bones_to_remove]
         all_frames_skeleton_position[i] = SkeletonData(useful_bones, frame.id)
-
+    
     bones = [bone for bone in bones if bone not in bones_to_remove]
-
+    
     return all_frames_skeleton_position, bones
 
 # Create a map of lines between the bones points
@@ -192,7 +196,7 @@ def visualize_skeleton(listOfPoints, lines):
     visualizer.run()
     visualizer.destroy_window()
 
-
+# get the skeleton data from the json file and the list of the bones
 all_frames_skeleton_position, bones = get_all_skeleton_frames(bones_to_remove)
 
 # get the 3D points of one chosen frame
@@ -206,6 +210,7 @@ for i, point in enumerate(listOfPoints):
 
 lines = create_lines_map(bonesGraph, bones)
 
+# visualize the 3D skeleton of the chosen frame, it can be rotated and zoomed in/out
 if SHOW_3D_SKELETON:
     visualize_skeleton(listOfPoints, lines)
 
@@ -227,6 +232,7 @@ translation_vector = np.array([camera_data['world_location']['x'],
                             camera_data['world_location']['z']])
 # convert the camera data to right handed coordinate system
 rotation_quaternion, translation_vector = left_to_right_handed(rotation_quaternion, translation_vector)
+# convert the rotation quaternion (x,y,z,w) to a rotation vector (x,y,z)
 rotation_vector = Rotation.from_quat(rotation_quaternion).as_rotvec()
 
 # defining the camera matrix
@@ -239,7 +245,7 @@ camera_matrix = np.array([[fx, 0, cx],
                           [0, fy, cy], 
                           [0, 0, 1]], np.float32)
 
-# Map the 3D point to 2D point  
+# Map the 3D point to 2D point, T_cam_world is the transformation matrix from the world coordinate system to the camera coordinate system
 T_cam_world = rot_vec_to_matrix(rotation_vector, translation_vector)
 rotation_vector, translation_vector = matrix_to_rot_vec(inv(T_cam_world)) 
 distortion_coeffs = np.zeros((5, 1), np.float32) # Define the distortion coefficients as 0,0,0,0,0 since we assume no distortion
@@ -260,7 +266,7 @@ for line in lines:
     start_point = (int(start_point[0][0] * SCALE + BIAS[0]), int(start_point[0][1] * SCALE + BIAS[1]))
     end_point = (int(end_point[0][0] * SCALE + BIAS[0]), int(end_point[0][1] * SCALE + BIAS[1]))
     cv2.line(img, start_point, end_point, BLACK, 2)
-  
+
 cv2.imshow('Image', img) 
 cv2.waitKey(0) 
 cv2.destroyAllWindows()
