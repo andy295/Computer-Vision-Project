@@ -26,6 +26,11 @@ def filterData(filePath, data):
             kalmanFilter(model)
             print(f'Data correctly filtered\n')
 
+# Function to initialize a Kalman filter.
+# It sets up the filter with specified parameters for time step, velocity,
+# acceleration, process noise, and measurement noise.
+# The function defines the transition and measurement matrices,
+# as well as noise covariance matrices, and initializes the filter's state.
 def initKalmanFilter(dt=5, vel=1, acc=1, processNoiseStD=1e-5, measurementNoiseStD=1e-5):
     # time step, we are assuming it constant for simplicity
     dtTo2 = 0.5 * dt**2
@@ -59,7 +64,9 @@ def initKalmanFilter(dt=5, vel=1, acc=1, processNoiseStD=1e-5, measurementNoiseS
 
     return kalman
 
-# Function to compute the Kalman filter to estimate missing values
+# Function to estimate missing values in a dataset using a Kalman filter.
+# It processes 3D positional data (X, Y, Z) from a source model,
+# filling in missing values where coordinates are zero.
 def kalmanFilter(sourceModel):
 
     # input data
@@ -103,7 +110,10 @@ def kalmanFilter(sourceModel):
         # plot the results
         plotData("Kalman Filter", sourceModel.positions, sourceModel.kfPositions)
 
-# data is a list of model, i.e. a list of markers
+# Function to perform cubic spline interpolation to estimate and fill in missing
+# 3D positional data (X, Y, Z) for a list of models (markers).
+# It identifies missing entries, interpolates the data based on available time points,
+# and fills in the missing values.
 def splineInterpolation(data):
 
     print(f'Performing spline interpolation\n')
@@ -115,14 +125,14 @@ def splineInterpolation(data):
         markerList.append(tempList)
     markerList = np.array(markerList)
 
-    # Number of markers
+    # number of markers
     num_markers, _, _ = markerList.shape
 
-    # Identify time entries with missing values
+    # identify time entries with missing values
     missing_indices = np.where((markerList == (0, 0, 0)).all(axis=0).all(axis=1))[0]
     available_indices = np.where(~(markerList == (0, 0, 0)).all(axis=0).all(axis=1))[0]
 
-    # Function to interpolate and fill missing values for each marker
+    # function to interpolate and fill missing values for each marker
     def interpolate_and_fill(markerList, missing_indices, available_indices):
         filledMarkerList = np.copy(markerList)
         t = available_indices  # Time points for available data
@@ -136,7 +146,7 @@ def splineInterpolation(data):
 
         return filledMarkerList
 
-    # Fill the missing data
+    # fill the missing data
     filledMarkerList = interpolate_and_fill(markerList, missing_indices, available_indices)
     for i, model in enumerate(data):
             xList, yList, zList = zip(*filledMarkerList[i])
@@ -151,6 +161,11 @@ def splineInterpolation(data):
         for i, model in enumerate(data):
             plotData("Spline interpolation for marker %d" % i, model.positions, model.splPositions)
 
+# Function to visualize 3D positional data by plotting it on a 3D scatter plot.
+# It takes the original data points and optionally a second set of data points
+# (after some operation) # and displays them in two separate charts side by side.
+# # The first chart shows the original data, while the second chart (if provided)
+# shows the processed data, labeled according to the specified operation.
 def plotData(operation, firstDataPoints, secondDataPoints=None):
 
     # extract data
