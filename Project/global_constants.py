@@ -9,6 +9,12 @@ from enum import IntEnum
 
 from utils import *
 
+# This file defines key constants and settings for a software project,
+# focusing on file handling, data processing, and experiment configurations.
+# It includes file extensions, predefined paths, data structure definitions,
+# filtering methods, I/O operations, and logging levels, centralizing these
+# elements for consistent use throughout the project.
+
 # FILE EXTENSIONS
 class Extension(IntEnum):
     none = 0
@@ -65,9 +71,9 @@ ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 DATA_PATH = os.path.join(ROOT_PATH, f'Data')
 SAVE_PATH = os.path.join(ROOT_PATH, f'Saved')
 SAVE_VIDEO_PATH = os.path.join(ROOT_PATH, f'Video')
-ACTOR_DATA_PATH = os.path.join(ROOT_PATH, 'Data', 'UnrealEngine5', 'actor_data.json')
-FRAME_IMAGE_PATH = os.path.join(ROOT_PATH, 'Data', 'UnrealEngine5', 'CVMap.')
-CAMERA_DATA_PATH = os.path.join(ROOT_PATH, 'Data', 'UnrealEngine5', 'camera_data.json')
+ACTOR_DATA_PATH = os.path.join(ROOT_PATH, f'Results', f'Task_3', f'UE5', f'actor_data.json')
+FRAME_IMAGE_PATH = os.path.join(ROOT_PATH, f'Results', f'Task_3', f'UE5', f'CVMap.')
+CAMERA_DATA_PATH = os.path.join(ROOT_PATH, f'Results', f'Task_3', f'UE5', f'camera_data.json')
 
 # used for testing purposes
 SRC_FILE = RIGID_BODY + EXTENSIONS[Extension.csv]
@@ -159,4 +165,4 @@ INFO = 2
 WARNING = 3
 DEBUG = 4
 
-VERBOSE = DEBUG
+VERBOSE = STANDARD

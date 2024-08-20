@@ -10,6 +10,7 @@ def choice(message, lastLevel, params):
 
     for i in range(len(params)):
       print(f'{i+1}. {params[i]}')
+
     print(f'{len(params)+1}. Return to the previous menu')
     print(f'0. Exit the program')
 
@@ -52,8 +53,8 @@ def main(operation=NEW, phase=ALL, outPath=''):
 
   while option not in ['0', 't']:
       print('Please select the type of operation you want to perform:')
-      print('1. Import and process data')
-      print('2. Import data')
+      print('1. Import and process data - CSV files')
+      print('2. Import data - BVH & C3D files')
       print('0. Exit the program')
 
       option = input('Enter your choice: ')
@@ -109,12 +110,12 @@ def main(operation=NEW, phase=ALL, outPath=''):
 
   if phase == ALL:
     if experiment.run():
-      #experiment.info()
       pass
   else:
     print(f'Error: Selected an invalid experiment phase: {phase}')
     print(f'Allowed phases are:')
     print(f'\t - {ALL} for running all phases of the experiment')
+
     return False
 
   return True

@@ -18,7 +18,6 @@ BLACK = (0, 0, 0)
 RED = (0, 0, 255)
 SCALE = 1
 BIAS = [0, 0]
-# BIAS = [HEIGHT/2, WIDTH/2]
 SHOW_3D_SKELETON = False
 img = cv2.imread(FRAME_IMAGE_PATH + FRAME_NR_PATH)
 img = cv2.resize(img, (WIDTH, HEIGHT))
@@ -266,5 +265,3 @@ for line in lines:
 cv2.imshow('Image', img) 
 cv2.waitKey(0) 
 cv2.destroyAllWindows()
-
-
