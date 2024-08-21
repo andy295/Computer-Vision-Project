@@ -15,17 +15,20 @@ def filterData(filePath, data):
     fName, fExt = os.path.splitext(fName)
 
     # only data extracted from rigidbody.csv file can be filtered
-    if fExt == EXTENSIONS[Extension.csv] and fName == RIGID_BODY:
+    if fExt == EXTENSIONS[Extension.csv]:
+        if fName == RIGID_BODY:
 
-        # perform spline interpolation
-        splineInterpolation(data)
+            # perform spline interpolation
+            splineInterpolation(data)
 
-        # perform Kalman filter
-        for model in data:
-            print(f'Performing Kalman filter on model: {model.getName()}')
-            kalmanFilter(model)
-    
-        print(f'Data correctly filtered\n')
+            # perform Kalman filter
+            for model in data:
+                print(f'Performing Kalman filter on model: {model.getName()}')
+                kalmanFilter(model)
+        
+            print(f'Data correctly filtered\n')
+        else:
+            print(f'Info: Filtering for file name: {fName} is not supported\n')
     elif fExt == EXTENSIONS[Extension.bvh] or fExt == EXTENSIONS[Extension.c3d]:
         print(f'Info: Filtering for file extension: {fExt} is not supported\n')
     else:
