@@ -26,7 +26,7 @@ def plotData(filePath=None, data=None):
           option = input(f'Enter your choice: ')
           if option == '1':
             print(f'Original rigid body points')
-            markerRigidBodyPlot(data, fName, None)
+            markerRigidBodyPlot(data, fName, typeOfFiltering=None)
             return True
 
           elif option == '2':
@@ -122,8 +122,6 @@ def visualizeSequence(visualizer, markersList, fName, typeOfFiltering, SAVE_VIDE
       image = visualizer.capture_screen_float_buffer(do_render=True)
       image = np.asarray(image)
       image = (image * 255).astype(np.uint8)  # convert to 8-bit image
-      image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)  # convert to BGR for OpenCV
-
       # write the frame to the video
       videoWriter.write(image)
 
@@ -204,7 +202,7 @@ def markerRigidBodyPlot(data, fName, typeOfFiltering):
       print("Invalid input, try again.")
 
 # saves the video or just displays it using the `visualizeSequence` function.
-def skeletonMarkerPlot(data, fName, typeOfFiltering=None):
+def skeletonMarkerPlot(data, fName):
 
   bonesMarkerList = []
   for model in data:
@@ -224,7 +222,7 @@ def skeletonMarkerPlot(data, fName, typeOfFiltering=None):
       print("Saving and showing video...")
       SAVE_VIDEO = True
       visualizer = setVisualizer(8.0)
-      visualizeSequence(visualizer, bonesMarkerList, fName, typeOfFiltering, SAVE_VIDEO)
+      visualizeSequence(visualizer, bonesMarkerList, fName, None, SAVE_VIDEO)
       print("Video saved")
       break
 
@@ -232,7 +230,7 @@ def skeletonMarkerPlot(data, fName, typeOfFiltering=None):
       print("Showing video...")
       SAVE_VIDEO = False
       visualizer = setVisualizer(8.0)
-      visualizeSequence(visualizer, bonesMarkerList, fName, typeOfFiltering, SAVE_VIDEO)
+      visualizeSequence(visualizer, bonesMarkerList, fName, None, SAVE_VIDEO)
       print("Video not saved")
       break
 
@@ -301,7 +299,7 @@ def skeletonJointsPlot(data, fName):
   line_set.lines = o3d.utility.Vector2iVector(lines)
 
   # set line color (e.g., red)
-  line_color = [1, 0, 0] # RGB color (red)
+  line_color = [1, 0, 0] # RGB color (red in live and blue in saved video)
 
   # create a LineSet with colored lines
   line_set.colors = o3d.utility.Vector3dVector(np.tile(line_color, (len(lines), 1)))
@@ -334,7 +332,6 @@ def skeletonJointsPlot(data, fName):
         image = visualizer.capture_screen_float_buffer(do_render=True)
         image = np.asarray(image)
         image = (image * 255).astype(np.uint8)  # Convert to 8-bit image
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)  # Convert to BGR for OpenCV
         # Write the frame to the video
         videoWriter.write(image)
       videoWriter.release()
