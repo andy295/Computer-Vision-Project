@@ -27,7 +27,7 @@ SCALE = 1
 BIAS = [0, 0]
 SHOW_3D_SKELETON = False
 
-bonesGraph = {
+BONES_GRAPH = {
     'pelvis' : ['spine_01', 'thigh_l', 'thigh_r'],
     'spine_01' : ['spine_02'],
     'spine_02' : ['spine_03'],
@@ -53,7 +53,7 @@ bonesGraph = {
 }
 
 # unnecessary bones removed for clarity of the projection
-bones_to_remove = ['root', 'center_of_mass', 'ik_foot_root', 'ik_hand_root', 'interaction', 'ik_hand_gun', 'ik_hand_l', 'ik_hand_r', 'ik_foot_l', 'ik_foot_r',
+BONES_TO_REMOVE = ['root', 'center_of_mass', 'ik_foot_root', 'ik_hand_root', 'interaction', 'ik_hand_gun', 'ik_hand_l', 'ik_hand_r', 'ik_foot_l', 'ik_foot_r',
                 'clavicle_out_l', 'clavicle_scap_l',
                 'index_01_l', 'index_02_l', 'index_03_l', 
                 'middle_01_l', 'middle_02_l', 'middle_03_l', 
@@ -131,7 +131,7 @@ def left_to_right_handed (quat, translation_vector):
     return quat, translation_vector
 
 # Read the JSON data from the file and save them in a list of SkeletonData objects
-def get_all_skeleton_frames(bones_to_remove):
+def get_all_skeleton_frames(BONES_TO_REMOVE):
 
     try:
         with open(ACTOR_DATA_PATH, 'r') as file:
@@ -159,17 +159,17 @@ def get_all_skeleton_frames(bones_to_remove):
     del all_frames_skeleton_position[0]
     for i in range(len(all_frames_skeleton_position)):
         frame = all_frames_skeleton_position[i]
-        useful_bones = [bone for bone in frame.coordinates if bone.id not in bones_to_remove]
+        useful_bones = [bone for bone in frame.coordinates if bone.id not in BONES_TO_REMOVE]
         all_frames_skeleton_position[i] = SkeletonData(useful_bones, frame.id)
     
-    bones = [bone for bone in bones if bone not in bones_to_remove]
+    bones = [bone for bone in bones if bone not in BONES_TO_REMOVE]
     
     return all_frames_skeleton_position, bones
 
 # Create a map of lines between the bones points
-def create_lines_map(bonesGraph, bones):
+def create_lines_map(BONES_GRAPH, bones):
     lines=[]
-    for key, values in bonesGraph.items():
+    for key, values in BONES_GRAPH.items():
         keyIndex = bones.index(key)
         for value in values:
             valueIndex = bones.index(value)
@@ -244,7 +244,7 @@ def main():
     img = cv2.resize(img, (WIDTH, HEIGHT))
 
     # get the skeleton data from the json file and the list of the bones
-    all_frames_skeleton_position, bones = get_all_skeleton_frames(bones_to_remove)
+    all_frames_skeleton_position, bones = get_all_skeleton_frames(BONES_TO_REMOVE)
 
     # get the 3D points of one chosen frame
     listOfPoints = [[point.coordinates[X], point.coordinates[Y], point.coordinates[Z]] 
@@ -255,7 +255,7 @@ def main():
     for i, point in enumerate(listOfPoints):
             _ , listOfPoints[i] = left_to_right_handed(np.array((0,0,0,1)), point)
 
-    lines = create_lines_map(bonesGraph, bones)
+    lines = create_lines_map(BONES_GRAPH, bones)
 
     # visualize the 3D skeleton of the chosen frame, it can be rotated and zoomed in/out
     if SHOW_3D_SKELETON:
