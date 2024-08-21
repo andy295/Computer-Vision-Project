@@ -27,14 +27,17 @@ def plotData(filePath=None, data=None):
           if option == '1':
             print(f'Original rigid body points')
             markerRigidBodyPlot(data, fName, None)
+            return True
 
           elif option == '2':
             print(f'Kalman filtered rigid body points')
             markerRigidBodyPlot(data, fName, KALMAN_FILTER)
+            return True
 
           elif option == '3':
             print(f'Spline interpolation estimated rigid body points')
             markerRigidBodyPlot(data, fName, SPLINE_INTERPOLATION)
+            return True
 
           elif option == '0':
             # exit the loop and end the program
@@ -72,6 +75,10 @@ def plotData(filePath=None, data=None):
 
           else:
               print(f'Invalid input, try again.')
+        
+        print()
+
+        return True
 
     else:
         print(f'Error: Invalid file extension: {fExt}\n')
@@ -196,7 +203,7 @@ def markerRigidBodyPlot(data, fName, typeOfFiltering):
       print("Invalid input, try again.")
 
 # saves the video or just displays it using the `visualizeSequence` function.
-def skeletonMarkerPlot(data, fName, typeOfFiltering):
+def skeletonMarkerPlot(data, fName, typeOfFiltering=None):
 
   bonesMarkerList = []
   for model in data:
