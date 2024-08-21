@@ -4,12 +4,9 @@ from models import createModels
 from plotter import plotData
 from data_manipulation import filterData
 
-# The Experiment class represents an experiment with datasets and models.
-# It provides functionality to initialize and manage an experiment.
-
-# Class attributes:
-# todo add description
-
+# This class is a structured framework that guides the user through the various stages of conducting an experiment,
+# from data input to model processing and visualization. It enforces consistency through controlled property access
+# and method-based operations, ensuring that each step of the experiment is executed correctly and in the proper sequence.
 class Experiment():
 
   def __init__(self, operation=NEW, inFile='', outPath='',
