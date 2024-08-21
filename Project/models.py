@@ -126,8 +126,8 @@ class CSVModel:
 
             if i == TYPE:
                 self._description['Type'] = part.replace(SPACE_REPLACEMENT, ' ')
-                if MARKER.lower() in self._description['Type'].lower():
-                    self._description['Type'] = MARKER[0].upper() + MARKER[1:]
+                if "marker" in self._description['Type'].lower():
+                    self._description['Type'] = "Marker"
 
             elif i == NAME:
                 self._description['Name'] = part.replace(SPACE_REPLACEMENT, ' ')
