@@ -30,30 +30,31 @@ We present the code used to develop our solution, along with the implementation 
 The `Project` folder contains all the files and scripts necessary to run the project.
 The structure of the project is as follows:
 ```bash
+	├── bvh_reader # library used to read bvh files
+	│   └── ...
+	├── Data # input files used to perform the tasks
+	│   └── ...
 	├── Documentation
 	│   ├── Report.pdf
 	│   └── Presentation.pdf
-	├── Data # input files used to perform the tasks
-	│   └── ...
 	├── Optional_Task # everithing related to the optional task
 	│   ├── Data # input files used to perform the task
 	│   │   └── ...
-	│   ├── Results # output data obtained by the task
-	│   │   └── ...
 	│   ├── Lib # libraries used to perform the task
+	│   │   └── ...
+	│   ├── Results # output data obtained organized by task
 	│   │   └── ...
 	│   └── mayn.py
 	├── Results # output data obtained by the tasks	
 	│   └── ...
-	├── bvh_reader # library used to read bvh files
-	│   └── ...
-	├── I_O.py
 	├── data_manipulation.py
 	├── experiment.py
 	├── global_constants.py
-	├── main.py
+	├── I_O.py
+	├── main.py # main script to run the first two tasks
 	├── models.py
 	├── plotter.py
+	├── unreal_skeleton_main.py # main script to run the third task
 	└── utils.py
 ```
 ### Task 1
