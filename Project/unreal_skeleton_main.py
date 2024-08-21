@@ -12,8 +12,13 @@ from scipy.spatial.transform import Rotation
 # file. It works only with the downloaded frames. Currently we have 0001, 0176, 0263, 0626. 
 # To change the frame, change the number in FRAME_NR_PATH (must have 4 digits) and FRAME_NR variable
 
-FRAME_NR_PATH = '0626.jpg'
-FRAME_NR = 626
+FRAMES = {
+    "CVMap.0001.jpg": 1,
+    "CVMap.0176.jpg": 176,
+    "CVMap.0263.jpg": 263,
+    "CVMap.0626.jpg": 626
+}
+
 WIDTH, HEIGHT = 1280, 720
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -21,9 +26,6 @@ RED = (0, 0, 255)
 SCALE = 1
 BIAS = [0, 0]
 SHOW_3D_SKELETON = False
-img = cv2.imread(FRAME_IMAGE_PATH + FRAME_NR_PATH)
-img = cv2.resize(img, (WIDTH, HEIGHT))
-
 
 bonesGraph = {
     'pelvis' : ['spine_01', 'thigh_l', 'thigh_r'],
@@ -196,77 +198,126 @@ def visualize_skeleton(listOfPoints, lines):
     visualizer.run()
     visualizer.destroy_window()
 
-# get the skeleton data from the json file and the list of the bones
-all_frames_skeleton_position, bones = get_all_skeleton_frames(bones_to_remove)
+def extractSuffix(key):
+    parts = key.split('.')
+    
+    # ensure that there are at least three parts (e.g., 'CVMap', '0001', 'jpg')
+    if len(parts) >= 3:
+        # join the second-to-last and last parts to get the desired suffix
+        return '.'.join(parts[1:])
+    else:
+        return None
 
-# get the 3D points of one chosen frame
-listOfPoints = [[point.coordinates[X], point.coordinates[Y], point.coordinates[Z]] 
-                for point in all_frames_skeleton_position[FRAME_NR].coordinates]
-listOfPoints = np.array(listOfPoints)
+def main():
 
-# convert the skeleton bone points to right handed coordinate system for the chosen frame
-for i, point in enumerate(listOfPoints):
-        _ , listOfPoints[i] = left_to_right_handed(np.array((0,0,0,1)), point)
+    option = '-1'
 
-lines = create_lines_map(bonesGraph, bones)
+    while option not in ['0']:
+        for i, frame in enumerate(FRAMES):
+            print(f'{i+1}. {frame}')
+        
+        print('0. Exit the program')
 
-# visualize the 3D skeleton of the chosen frame, it can be rotated and zoomed in/out
-if SHOW_3D_SKELETON:
-    visualize_skeleton(listOfPoints, lines)
+        option = input('Enter your choice: ')
 
-# Get camera data from the json file
-try:
-    with open(CAMERA_DATA_PATH, 'r') as file:
-        camera_data = json.load(file)
-except FileNotFoundError:
-        print(f"File 1: {CAMERA_DATA_PATH}")
+        if option in ['1', '2', '3', '4']:
+            frameKey = list(FRAMES.keys())[int(option)-1]
+            FRAME_NR_PATH = extractSuffix(frameKey)
+            if FRAME_NR_PATH is None:
+                print(f"Error: invalid frame number")
+                break
+
+            FRAME_NR = FRAMES[frameKey]
+            break
+
+        elif option == '0':
+          print('Exiting the program...')
+        else:
+            print('Invalid input, try again.')
+        
+        print()
+
+    if option == '0':
+        return True
+
+    img = cv2.imread(FRAME_IMAGE_PATH + FRAME_NR_PATH)
+    img = cv2.resize(img, (WIDTH, HEIGHT))
+
+    # get the skeleton data from the json file and the list of the bones
+    all_frames_skeleton_position, bones = get_all_skeleton_frames(bones_to_remove)
+
+    # get the 3D points of one chosen frame
+    listOfPoints = [[point.coordinates[X], point.coordinates[Y], point.coordinates[Z]] 
+                    for point in all_frames_skeleton_position[FRAME_NR].coordinates]
+    listOfPoints = np.array(listOfPoints)
+
+    # convert the skeleton bone points to right handed coordinate system for the chosen frame
+    for i, point in enumerate(listOfPoints):
+            _ , listOfPoints[i] = left_to_right_handed(np.array((0,0,0,1)), point)
+
+    lines = create_lines_map(bonesGraph, bones)
+
+    # visualize the 3D skeleton of the chosen frame, it can be rotated and zoomed in/out
+    if SHOW_3D_SKELETON:
+        visualize_skeleton(listOfPoints, lines)
+
+    # Get camera data from the json file
+    try:
+        with open(CAMERA_DATA_PATH, 'r') as file:
+            camera_data = json.load(file)
+    except FileNotFoundError:
+            print(f"File 1: {CAMERA_DATA_PATH}")
+            exit(1)
+    fov = camera_data['field_of_view']
+    aspect_ratio = camera_data['aspect_ratio']
+    rotation_quaternion = np.deg2rad(np.array([camera_data['world_rotation']['x'],
+                                camera_data['world_rotation']['y'],
+                                camera_data['world_rotation']['z'],
+                                camera_data['world_rotation']['w']]))
+    translation_vector = np.array([camera_data['world_location']['x'],
+                                camera_data['world_location']['y'],
+                                camera_data['world_location']['z']])
+    # convert the camera data to right handed coordinate system
+    rotation_quaternion, translation_vector = left_to_right_handed(rotation_quaternion, translation_vector)
+    # convert the rotation quaternion (x,y,z,w) to a rotation vector (x,y,z)
+    rotation_vector = Rotation.from_quat(rotation_quaternion).as_rotvec()
+
+    # defining the camera matrix
+    fov_rad = math.radians(fov)
+    fx = (WIDTH / 2) / math.tan(fov_rad / 2)
+    fy = (HEIGHT / 2) / math.tan((fov_rad / 2) / aspect_ratio)
+    cx = WIDTH / 2
+    cy = HEIGHT / 2
+    camera_matrix = np.array([[fx, 0, cx], 
+                            [0, fy, cy], 
+                            [0, 0, 1]], np.float32)
+
+    # Map the 3D point to 2D point, T_cam_world is the transformation matrix from the world coordinate system to the camera coordinate system
+    T_cam_world = rot_vec_to_matrix(rotation_vector, translation_vector)
+    rotation_vector, translation_vector = matrix_to_rot_vec(inv(T_cam_world)) 
+    distortion_coeffs = np.zeros((5, 1), np.float32) # Define the distortion coefficients as 0,0,0,0,0 since we assume no distortion
+    projected_points, _ = cv2.projectPoints(listOfPoints, rotation_vector, translation_vector, camera_matrix, distortion_coeffs) 
+    if img is None:
+        print("Image not read")
         exit(1)
-fov = camera_data['field_of_view']
-aspect_ratio = camera_data['aspect_ratio']
-rotation_quaternion = np.deg2rad(np.array([camera_data['world_rotation']['x'],
-                            camera_data['world_rotation']['y'],
-                            camera_data['world_rotation']['z'],
-                            camera_data['world_rotation']['w']]))
-translation_vector = np.array([camera_data['world_location']['x'],
-                            camera_data['world_location']['y'],
-                            camera_data['world_location']['z']])
-# convert the camera data to right handed coordinate system
-rotation_quaternion, translation_vector = left_to_right_handed(rotation_quaternion, translation_vector)
-# convert the rotation quaternion (x,y,z,w) to a rotation vector (x,y,z)
-rotation_vector = Rotation.from_quat(rotation_quaternion).as_rotvec()
+    # SCALE and BIAS are used to adjust the skeleton size and position if needed 
+    for point in projected_points: 
+        x = (int(point[0][0]*SCALE + (BIAS[0])))
+        y = (int(point[0][1]*SCALE +int(BIAS[1])))
+        # draw bones points on the image
+        img = cv2.circle(img, (x, y), 5, RED, -1) 
+    # draw lines between the bones points on the image
+    for line in lines:
+        start_point = projected_points[line[0]].astype(int)
+        end_point = projected_points[line[1]]. astype(int)
+        start_point = (int(start_point[0][0] * SCALE + BIAS[0]), int(start_point[0][1] * SCALE + BIAS[1]))
+        end_point = (int(end_point[0][0] * SCALE + BIAS[0]), int(end_point[0][1] * SCALE + BIAS[1]))
+        cv2.line(img, start_point, end_point, BLACK, 2)
 
-# defining the camera matrix
-fov_rad = math.radians(fov)
-fx = (WIDTH / 2) / math.tan(fov_rad / 2)
-fy = (HEIGHT / 2) / math.tan((fov_rad / 2) / aspect_ratio)
-cx = WIDTH / 2
-cy = HEIGHT / 2
-camera_matrix = np.array([[fx, 0, cx], 
-                          [0, fy, cy], 
-                          [0, 0, 1]], np.float32)
+    cv2.imshow('Image', img)
+    cv2.waitKey(0) 
+    cv2.destroyAllWindows()
 
-# Map the 3D point to 2D point, T_cam_world is the transformation matrix from the world coordinate system to the camera coordinate system
-T_cam_world = rot_vec_to_matrix(rotation_vector, translation_vector)
-rotation_vector, translation_vector = matrix_to_rot_vec(inv(T_cam_world)) 
-distortion_coeffs = np.zeros((5, 1), np.float32) # Define the distortion coefficients as 0,0,0,0,0 since we assume no distortion
-projected_points, _ = cv2.projectPoints(listOfPoints, rotation_vector, translation_vector, camera_matrix, distortion_coeffs) 
-if img is None:
-    print("Image not read")
-    exit(1)
-# SCALE and BIAS are used to adjust the skeleton size and position if needed 
-for point in projected_points: 
-    x = (int(point[0][0]*SCALE + (BIAS[0])))
-    y = (int(point[0][1]*SCALE +int(BIAS[1])))
-    # draw bones points on the image
-    img = cv2.circle(img, (x, y), 5, RED, -1) 
-# draw lines between the bones points on the image
-for line in lines:
-    start_point = projected_points[line[0]].astype(int)
-    end_point = projected_points[line[1]]. astype(int)
-    start_point = (int(start_point[0][0] * SCALE + BIAS[0]), int(start_point[0][1] * SCALE + BIAS[1]))
-    end_point = (int(end_point[0][0] * SCALE + BIAS[0]), int(end_point[0][1] * SCALE + BIAS[1]))
-    cv2.line(img, start_point, end_point, BLACK, 2)
+    return True
 
-cv2.imshow('Image', img) 
-cv2.waitKey(0) 
-cv2.destroyAllWindows()
+main()
