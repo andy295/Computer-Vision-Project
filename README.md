@@ -62,9 +62,9 @@ The goal was to familiarize ourselves with the standard output files of a motion
 
 For the CSV files, we developed a custom solution in Python to read their content. From  the first file we extracted the x, y, and z coordinates for each joint of the skeleton, along with their connections. From the second one, we extracted the coordinates of the markers of a rigid body. The data for each object were then plotted in 3D using the Open3d library, allowing us to observe the positions of the various elements that compose the objects in a 3D space.
 
-| Skeleton | Rigid Body |
-| - | - |
-| ![](./Project/Results/Task_1/skeleton.PNG) | ![](./Project/Results/Task_1/rigid_body.gif) |
+| Skeleton (Markers & Joints) | Skeleton (Markers) | Rigid Body |
+| - | - | - |
+| ![](./Project/Results/Task_1/skeleton_markers.gif) | ![](./Project/Results/Task_1/skeleton_joints.gif) | ![](./Project/Results/Task_1/rigid_body.gif) |
 
 For the BVH and C3D files, we decided to use some of the libraries suggested during the course to extract the relevant information. In both cases, the extracted information is stored within dedicated structures designed to be expandable, allowing for the implementation of additional functionalities that can utilize this data.
 
