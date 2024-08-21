@@ -2,6 +2,7 @@ import open3d as o3d
 import cv2
 import os
 from global_constants import *
+from I_O import *
 
 # The number of frames per second for the videos we want to save
 FPS = 90
@@ -101,6 +102,11 @@ def visualizeSequence(visualizer, markersList, fName, typeOfFiltering, SAVE_VIDE
 
   videoWriter = None
   if SAVE_VIDEO:
+    
+    if not checkDir(mode=SAVE, path=SAVE_VIDEO_PATH):
+      print(f"Error: Impossible to save the video in the directory: {SAVE_VIDEO_PATH}")
+      return
+
     if typeOfFiltering is not None:
       fileName = os.path.join(SAVE_VIDEO_PATH, (typeOfFiltering + fName + '.avi'))
     else:
@@ -312,6 +318,11 @@ def skeletonJointsPlot(data, fName):
     option = input("Enter your choice: ")
     if option == '1':
       print("Saving and showing video...")
+
+      if not checkDir(mode=SAVE, path=SAVE_VIDEO_PATH):
+        print(f"Error: Impossible to save the video in the directory: {SAVE_VIDEO_PATH}")
+        return
+
       # Iteration over all the point clouds
       videoWriter = cv2.VideoWriter(os.path.join(SAVE_VIDEO_PATH, (fName + '.avi')), cv2.VideoWriter_fourcc(*'DIVX'), FPS, (720, 480))
       for i, skeletonPoints in enumerate(vertices):
