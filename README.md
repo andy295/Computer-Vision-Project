@@ -71,9 +71,9 @@ For the BVH and C3D files, we decided to use some of the libraries suggested dur
 ### Task 2
 Task 2 involves using post-processing methodologies on the rigid body data to address the problem of flickering caused by occlusion phenomena. We tackled this issue by implementing two filters: the Kalman filter and the Spline interpolation filter.
 
-| Kalman filter | Spline interpolation filter |
-| - | - |
-| ![](./Project/Results/Task_2/rigid_body_kalman.gif) | ![](./Project/Results/Task_2/rigid_body_spline.gif) |
+ Original | Kalman filter | Spline interpolation filter |
+| - | - | - |
+| ![](./Project/Results/Task_1/rigid_body.gif) | ![](./Project/Results/Task_2/rigid_body_kalman.gif) | ![](./Project/Results/Task_2/rigid_body_spline.gif) |
 
 ### Task 3
 The goal of the task was to obtain the 3D to 2D projection of joint positions onto the camera plane. We used Unreal Engine 5 to create and record an animated scene.
