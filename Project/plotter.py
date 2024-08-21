@@ -206,7 +206,7 @@ def skeletonMarkerPlot(data, fName):
 
   bonesMarkerList = []
   for model in data:
-    if model._description['Type'] == 'Marker':
+    if model._description['Type'] == 'Bone Marker':
       points = list(zip(model._positions['x'], model._positions['y'], model._positions['z']))
       bonesMarkerList.append(points)
 
