@@ -89,10 +89,16 @@ def getIndex(start, dictionary):
 # captures and writes the frames to a video file or simply displays them.
 # The function skips certain frames to reduce computation and finally releases resources
 # or closes the visualizer window.
-def visualizeSequence(visualizer, markersList, fName, SAVE_VIDEO):
+def visualizeSequence(visualizer, markersList, fName, typeOfFiltering, SAVE_VIDEO):
 
+  videoWriter = None
   if SAVE_VIDEO:
-    videoWriter = cv2.VideoWriter(os.path.join(SAVE_VIDEO_PATH, (typeOfFiltering + fName + '.avi')), cv2.VideoWriter_fourcc(*'DIVX'), FPS, (720, 480))
+    if typeOfFiltering is not None:
+      fileName = os.path.join(SAVE_VIDEO_PATH, (typeOfFiltering + fName + '.avi'))
+    else:
+      fileName = os.path.join(SAVE_VIDEO_PATH, (fName + '.avi'))
+
+    videoWriter = cv2.VideoWriter(fileName, cv2.VideoWriter_fourcc(*'DIVX'), FPS, (720, 480))
     for i, marker in enumerate(markersList):
       if i % 3 == 0: # skip every 3rd frame to reduce computations
         continue
@@ -126,7 +132,9 @@ def visualizeSequence(visualizer, markersList, fName, SAVE_VIDEO):
       visualizer.update_renderer()
 
   visualizer.destroy_window()
-  videoWriter.release()
+  
+  if videoWriter is not None:
+    videoWriter.release()
 
 
 def setVisualizer(pointSize):
