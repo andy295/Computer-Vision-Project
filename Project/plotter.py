@@ -80,9 +80,10 @@ def plotData(filePath=None, data=None):
 
         return True
 
+    elif fExt == EXTENSIONS[Extension.bvh] or fExt == EXTENSIONS[Extension.c3d]:
+        print(f'Info: Plotting for file extension: {fExt} is not supported\n')
     else:
         print(f'Error: Invalid file extension: {fExt}\n')
-
 
 def getIndex(start, dictionary):
   for key in dictionary.keys():

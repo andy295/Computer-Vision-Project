@@ -56,7 +56,7 @@ INPUT_EXTENSIONS = (
 RIGID_BODY = 'rigidbody'
 SKELETON = 'skeleton'
 ANIMATION = 'animation'
-MARKER = 'marker'
+MARKER = 'markers'
 
 CSV_LIST = [RIGID_BODY + EXTENSIONS[Extension.csv], SKELETON + EXTENSIONS[Extension.csv]]
 OTHER_LIST = [ANIMATION + EXTENSIONS[Extension.bvh], MARKER + EXTENSIONS[Extension.c3d]]

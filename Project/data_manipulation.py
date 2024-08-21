@@ -24,7 +24,12 @@ def filterData(filePath, data):
         for model in data:
             print(f'Performing Kalman filter on model: {model.getName()}')
             kalmanFilter(model)
-            print(f'Data correctly filtered\n')
+    
+        print(f'Data correctly filtered\n')
+    elif fExt == EXTENSIONS[Extension.bvh] or fExt == EXTENSIONS[Extension.c3d]:
+        print(f'Info: Filtering for file extension: {fExt} is not supported\n')
+    else:
+        print(f'Error: Invalid file extension: {fExt}\n')
 
 # Function to initialize a Kalman filter.
 # It sets up the filter with specified parameters for time step, velocity,

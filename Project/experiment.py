@@ -234,8 +234,6 @@ class Experiment():
 
     filterData(self._inFile, self._models)
 
-    print(f'Data correctly filtered\n')
-
   # It ensures the sequential execution of the experiment steps and provides
   # a convenient way to run the entire experiment with a single method call.
   def run(self):
